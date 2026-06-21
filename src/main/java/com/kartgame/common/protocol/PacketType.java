@@ -18,6 +18,13 @@ public enum PacketType {
         this.id = (byte) id;
     }
 
+    public static PacketType fromId(byte id) {
+        for (PacketType type : values()) {
+            if (id == type.getId()) return type;
+        }
+        throw new IllegalArgumentException("Invalid type id");
+    }
+
     public byte getId() {
         return id;
     }

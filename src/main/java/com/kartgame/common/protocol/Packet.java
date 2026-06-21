@@ -43,4 +43,16 @@ public abstract class Packet {
 
         return buffer;
     }
+
+    public PacketType getType() {
+        return type;
+    }
+
+    public int getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(int playerId) {
+        this.playerId = playerId;
+    }
 }
