@@ -44,6 +44,16 @@ public abstract class Packet {
         return buffer;
     }
 
+    public byte[] serializePayload() {
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        writePayload(buffer);
+        buffer.flip();
+
+        byte[] payloadBytes = new byte[buffer.limit()];
+        buffer.get(payloadBytes);
+        return payloadBytes;
+    }
+
     public PacketType getType() {
         return type;
     }
