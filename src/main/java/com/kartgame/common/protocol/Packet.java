@@ -14,6 +14,8 @@ public abstract class Packet {
     }
 
     protected abstract void writePayload(ByteBuffer buffer);
+    protected abstract void readPayload(ByteBuffer buffer, short length);
+    // read payload INTO the buffer
 
     public ByteBuffer serialize() {
         /*
