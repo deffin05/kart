@@ -1,4 +1,4 @@
-package com.kartgame.common.encryption;
+package com.kartgame.common.security;
 
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
