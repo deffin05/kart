@@ -114,6 +114,25 @@ public class TCPClientHandler implements Runnable {
         this.aesEngine = new AESEngine(aesKey);
     }
 
+    public void sendPacket(Packet packet) {
+        synchronized (this.out) {
+            try {
+                packet.setPlayerToken(this.playerToken);
+
+                byte[] payloadBytes = packet.serializePayload();
+
+                byte[] payloadEncrypted = aesEngine.encrypt(payloadBytes);
+                byte[] packetBytes = packet.serialize(payloadEncrypted);
+
+                out.write(packetBytes);
+                out.flush();
+            } catch (IOException e) {
+                System.err.println("Failed to send packet: " + e.getMessage());
+                close();
+            }
+        }
+    }
+
     public void close() {
         try {
             if (socket != null && !socket.isClosed()) {
@@ -130,5 +149,13 @@ public class TCPClientHandler implements Runnable {
 
     public Socket getSocket() {
         return socket;
+    }
+
+    public int getPlayerToken() {
+        return playerToken;
+    }
+
+    public void setPlayerToken(int playerToken) {
+        this.playerToken = playerToken;
     }
 }
