@@ -4,6 +4,7 @@ import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.PacketRegistry;
 import com.kartgame.common.security.AESEngine;
 import com.kartgame.common.security.RSAEngineServer;
+import com.kartgame.server.packets.PacketDispatcher;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -15,6 +16,7 @@ import java.nio.ByteBuffer;
 
 public class TCPClientHandler implements Runnable {
     private final RSAEngineServer rsaEngine;
+    private final PacketDispatcher dispatcher;
     private final Socket socket;
     private final DataInputStream in;
     private final DataOutputStream out;
@@ -24,8 +26,9 @@ public class TCPClientHandler implements Runnable {
 
     private int playerToken = -1;
 
-    public TCPClientHandler(Socket socket, RSAEngineServer rsaEngine) throws IOException {
+    public TCPClientHandler(Socket socket, RSAEngineServer rsaEngine, PacketDispatcher dispatcher) throws IOException {
         this.rsaEngine = rsaEngine;
+        this.dispatcher = dispatcher;
         this.socket = socket;
         this.out = new DataOutputStream(socket.getOutputStream());
         this.in = new DataInputStream(socket.getInputStream());
@@ -73,7 +76,9 @@ public class TCPClientHandler implements Runnable {
 
                 Packet packet = PacketRegistry.parse(packetBuffer);
 
-                processPacket(packet);
+                if (packet != null) {
+                    dispatcher.dispatch(packet, this);
+                }
             }
         } catch (SecurityException e) {
             System.err.println("Security violation: " + e.getMessage());
@@ -89,10 +94,6 @@ public class TCPClientHandler implements Runnable {
         } finally {
             close();
         }
-    }
-
-    private void processPacket(Packet packet) {
-        System.out.println("Received packet: " + packet);
     }
 
     private void executeHandshake() throws IOException {

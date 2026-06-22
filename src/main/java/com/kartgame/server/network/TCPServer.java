@@ -1,6 +1,7 @@
 package com.kartgame.server.network;
 
 import com.kartgame.common.security.RSAEngineServer;
+import com.kartgame.server.packets.PacketDispatcher;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -11,12 +12,14 @@ import java.util.concurrent.Executors;
 public class TCPServer implements Runnable{
     public static int PORT = 13488;
     private final RSAEngineServer rsaEngine;
+    private final PacketDispatcher packetDispatcher;
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private boolean isRunning = true;
 
-    public TCPServer(RSAEngineServer rsaEngine) throws IOException {
+    public TCPServer(RSAEngineServer rsaEngine, PacketDispatcher packetDispatcher) throws IOException {
         this.rsaEngine = rsaEngine;
+        this.packetDispatcher = packetDispatcher;
         this.serverSocket = new ServerSocket(PORT);
         this.executorService = Executors.newCachedThreadPool();
         System.out.println("TCP server started: " + serverSocket);
@@ -29,7 +32,7 @@ public class TCPServer implements Runnable{
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("New TCP connection: " + clientSocket);
 
-                TCPClientHandler clientHandler = new TCPClientHandler(clientSocket, rsaEngine);
+                TCPClientHandler clientHandler = new TCPClientHandler(clientSocket, rsaEngine, packetDispatcher);
                 executorService.submit(clientHandler);
 
             } catch (IOException e) {
