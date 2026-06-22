@@ -10,7 +10,7 @@ import java.util.Map;
 public class PacketDispatcher {
     private final Map<PacketType, PacketHandler<? extends Packet>> handlers = new HashMap<>();
     public PacketDispatcher() {
-//        handlers.put();
+        handlers.put(PacketType.C2S_LOGIN, new C2S_LoginHandler());
     }
 
     @SuppressWarnings("unchecked")
