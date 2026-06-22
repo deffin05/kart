@@ -32,20 +32,6 @@ public class C2S_LoginPacket extends Packet {
         password = readString(buffer);
     }
 
-    private void writeString(ByteBuffer buffer, String s) {
-        // Write length of string + string
-        byte[] strBytes = s.getBytes(StandardCharsets.UTF_8);
-        buffer.putShort((short) strBytes.length);
-        buffer.put(strBytes);
-    }
-
-    private String readString(ByteBuffer buffer) {
-        short strLen = buffer.getShort();
-        byte[] strBytes = new byte[strLen];
-        buffer.get(strBytes);
-        return new String(strBytes, StandardCharsets.UTF_8);
-    }
-
     public String getUsername() {
         return username;
     }
