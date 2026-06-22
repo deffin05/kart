@@ -83,6 +83,9 @@ public class TCPClientHandler implements Runnable {
             System.out.println("Client disconnected: " + socket);
         } catch (IOException e) {
             System.err.println("Client connection lost: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             close();
         }
@@ -118,5 +121,13 @@ public class TCPClientHandler implements Runnable {
         } catch (IOException e) {
             System.err.println("Error closing socket for " + socket.getRemoteSocketAddress());
         }
+    }
+
+    public boolean isAuthenticated() {
+        return playerToken != -1;
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 }
