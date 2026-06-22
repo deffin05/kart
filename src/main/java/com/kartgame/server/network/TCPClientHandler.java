@@ -1,6 +1,7 @@
 package com.kartgame.server.network;
 
 import com.kartgame.common.protocol.Packet;
+import com.kartgame.common.protocol.PacketRegistry;
 import com.kartgame.common.security.AESEngine;
 import com.kartgame.common.security.RSAEngineServer;
 
@@ -10,6 +11,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.nio.ByteBuffer;
 
 public class TCPClientHandler implements Runnable {
     private final RSAEngineServer rsaEngine;
@@ -17,7 +19,10 @@ public class TCPClientHandler implements Runnable {
     private final DataInputStream in;
     private final DataOutputStream out;
 
+    private boolean isRunning = true;
     private AESEngine aesEngine;
+
+    private int playerToken = -1;
 
     public TCPClientHandler(Socket socket, RSAEngineServer rsaEngine) throws IOException {
         this.rsaEngine = rsaEngine;
@@ -33,10 +38,45 @@ public class TCPClientHandler implements Runnable {
             executeHandshake();
 
             socket.setSoTimeout(60_000);
-            while (!socket.isClosed() && !Thread.currentThread().isInterrupted()) {
-                byte[] header = new byte[Packet.HEADER_SIZE];
-                in.readFully(header);
+            while (isRunning && !socket.isClosed() && !Thread.currentThread().isInterrupted()) {
+                byte[] headerBytes = new byte[Packet.HEADER_SIZE];
+                in.readFully(headerBytes);
+
+                ByteBuffer headerBuffer = ByteBuffer.wrap(headerBytes);
+                byte magic = headerBuffer.get();
+                byte typeId = headerBuffer.get();
+                int playerToken = headerBuffer.getInt();
+                short payloadLength = headerBuffer.getShort();
+
+                if (magic != Packet.MAGIC_BYTE) {
+                    throw new SecurityException("Invalid Magic Byte.");
+                }
+
+                if (this.playerToken != -1 && playerToken != this.playerToken) {
+                    throw new SecurityException("Player token mismatch.");
+                }
+                byte[] payloadBytes = new byte[payloadLength];
+                in.readFully(payloadBytes);
+
+                byte[] decryptedPayload = aesEngine.decrypt(payloadBytes);
+
+                short decryptedPayloadLength = (short) decryptedPayload.length;
+                ByteBuffer packetBuffer = ByteBuffer.allocate(Packet.HEADER_SIZE + decryptedPayloadLength);
+
+                packetBuffer.put(magic);
+                packetBuffer.put(typeId);
+                packetBuffer.putInt(playerToken);
+                packetBuffer.putShort(decryptedPayloadLength);
+
+                packetBuffer.put(decryptedPayload);
+                packetBuffer.flip();
+
+                Packet packet = PacketRegistry.parse(packetBuffer);
+
+                processPacket(packet);
             }
+        } catch (SecurityException e) {
+            System.err.println("Security violation: " + e.getMessage());
         } catch (SocketTimeoutException e) {
             System.out.println("Client timed out: " + socket);
         } catch (EOFException e) {
@@ -46,6 +86,10 @@ public class TCPClientHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private void processPacket(Packet packet) {
+        System.out.println("Received packet: " + packet);
     }
 
     private void executeHandshake() throws IOException {

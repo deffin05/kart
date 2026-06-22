@@ -44,6 +44,18 @@ public abstract class Packet {
         return buffer;
     }
 
+    public byte[] serialize(byte[] encryptedPayload) {
+        short payloadLength = (short) encryptedPayload.length;
+        ByteBuffer buffer = ByteBuffer.allocate(Packet.HEADER_SIZE + payloadLength);
+        buffer.put(MAGIC_BYTE);
+        buffer.put(type.getId());
+        buffer.putInt(playerId);
+        buffer.putShort(payloadLength);
+
+        buffer.put(encryptedPayload);
+        return buffer.array();
+    }
+
     public byte[] serializePayload() {
         ByteBuffer buffer = ByteBuffer.allocate(1024);
         writePayload(buffer);
@@ -64,5 +76,13 @@ public abstract class Packet {
 
     public void setPlayerId(int playerId) {
         this.playerId = playerId;
+    }
+
+    @Override
+    public String toString() {
+        return "Packet{" +
+                "type=" + type +
+                ", playerId=" + playerId +
+                '}';
     }
 }
