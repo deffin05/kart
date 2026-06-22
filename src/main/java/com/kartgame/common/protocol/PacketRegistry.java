@@ -32,7 +32,7 @@ public class PacketRegistry {
                 throw new UnsupportedOperationException("Unimplemented packet type: " + type);
         }
 
-        packet.setPlayerId(playerId);
+        packet.setPlayerToken(playerId);
         packet.readPayload(buffer, payloadLength);
 
         return packet;

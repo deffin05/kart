@@ -7,7 +7,7 @@ public abstract class Packet {
     public static final byte HEADER_SIZE = 8;
 
     private final PacketType type;
-    private int playerId; // ??
+    private int playerToken; // ??
 
     protected Packet(PacketType type) {
         this.type = type;
@@ -35,7 +35,7 @@ public abstract class Packet {
 
         buffer.put(MAGIC_BYTE);
         buffer.put(type.getId());
-        buffer.putInt(playerId);
+        buffer.putInt(playerToken);
         buffer.putShort(payloadLength);
 
         buffer.put(payloadBuffer);
@@ -49,7 +49,7 @@ public abstract class Packet {
         ByteBuffer buffer = ByteBuffer.allocate(Packet.HEADER_SIZE + payloadLength);
         buffer.put(MAGIC_BYTE);
         buffer.put(type.getId());
-        buffer.putInt(playerId);
+        buffer.putInt(playerToken);
         buffer.putShort(payloadLength);
 
         buffer.put(encryptedPayload);
@@ -70,19 +70,19 @@ public abstract class Packet {
         return type;
     }
 
-    public int getPlayerId() {
-        return playerId;
+    public int getPlayerToken() {
+        return playerToken;
     }
 
-    public void setPlayerId(int playerId) {
-        this.playerId = playerId;
+    public void setPlayerToken(int playerToken) {
+        this.playerToken = playerToken;
     }
 
     @Override
     public String toString() {
         return "Packet{" +
                 "type=" + type +
-                ", playerId=" + playerId +
+                ", playerId=" + playerToken +
                 '}';
     }
 }

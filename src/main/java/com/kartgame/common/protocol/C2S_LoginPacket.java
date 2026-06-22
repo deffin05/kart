@@ -4,12 +4,12 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class C2S_LoginPacket extends Packet {
-    private String login;
+    private String username;
     private String password;
 
     public C2S_LoginPacket(String login, String password) {
         super(PacketType.C2S_LOGIN);
-        this.login = login;
+        this.username = login;
         this.password = password;
     }
 
@@ -19,13 +19,13 @@ public class C2S_LoginPacket extends Packet {
 
     @Override
     protected void writePayload(ByteBuffer buffer) {
-        writeString(buffer, login);
+        writeString(buffer, username);
         writeString(buffer, password);
     }
 
     @Override
     protected void readPayload(ByteBuffer buffer, short length) {
-        login = readString(buffer);
+        username = readString(buffer);
         password = readString(buffer);
     }
 
@@ -41,5 +41,21 @@ public class C2S_LoginPacket extends Packet {
         byte[] strBytes = new byte[strLen];
         buffer.get(strBytes);
         return new String(strBytes, StandardCharsets.UTF_8);
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
