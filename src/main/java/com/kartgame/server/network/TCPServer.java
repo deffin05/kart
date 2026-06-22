@@ -13,7 +13,7 @@ public class TCPServer implements Runnable{
     private final RSAEngineServer rsaEngine;
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
-    private boolean isRunning;
+    private boolean isRunning = true;
 
     public TCPServer(RSAEngineServer rsaEngine) throws IOException {
         this.rsaEngine = rsaEngine;
@@ -46,6 +46,7 @@ public class TCPServer implements Runnable{
         isRunning = false;
         try {
             serverSocket.close();
+            executorService.shutdown();
         } catch (IOException e) {
             e.printStackTrace();
         }

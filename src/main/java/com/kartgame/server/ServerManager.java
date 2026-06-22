@@ -4,14 +4,21 @@ import com.kartgame.common.security.RSAEngineServer;
 import com.kartgame.server.network.TCPServer;
 
 public class ServerManager {
+    private TCPServer tcpServer;
     public static void main(String[] args) {
+        new ServerManager().boot();
+    }
+
+    public void boot() {
         System.out.println("Starting the server");
+
+        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
 
         try {
             RSAEngineServer rsaEngine = new RSAEngineServer();
             rsaEngine.generateKeyPair();
 
-            TCPServer tcpServer = new TCPServer(rsaEngine);
+            this.tcpServer = new TCPServer(rsaEngine);
             Thread tcpThread = new Thread(tcpServer);
 
             tcpThread.start();
@@ -20,5 +27,11 @@ public class ServerManager {
             e.printStackTrace();
             System.exit(1);
         }
+    }
+
+    private void shutdown() {
+        System.out.println("Initiating shutdown");
+
+        tcpServer.stop();
     }
 }
