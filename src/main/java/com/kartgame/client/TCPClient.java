@@ -1,6 +1,6 @@
 package com.kartgame.client;
 
-import com.kartgame.common.protocol.C2S_LoginPacket;
+import com.kartgame.common.protocol.packets.C2S_LoginPacket;
 import com.kartgame.common.security.AESEngine;
 import com.kartgame.common.security.RSAEngineClient;
 import com.kartgame.server.network.TCPServer;

@@ -1,5 +1,7 @@
 package com.kartgame.common.protocol;
 
+import com.kartgame.common.protocol.packets.C2S_LoginPacket;
+
 import java.nio.ByteBuffer;
 
 public class PacketRegistry {
@@ -32,7 +34,7 @@ public class PacketRegistry {
                 throw new UnsupportedOperationException("Unimplemented packet type: " + type);
         }
 
-        packet.setPlayerId(playerId);
+        packet.setPlayerToken(playerId);
         packet.readPayload(buffer, payloadLength);
 
         return packet;

@@ -2,6 +2,7 @@ package com.kartgame.server;
 
 import com.kartgame.common.security.RSAEngineServer;
 import com.kartgame.server.network.TCPServer;
+import com.kartgame.server.packets.PacketDispatcher;
 
 public class ServerManager {
     private TCPServer tcpServer;
@@ -18,7 +19,9 @@ public class ServerManager {
             RSAEngineServer rsaEngine = new RSAEngineServer();
             rsaEngine.generateKeyPair();
 
-            this.tcpServer = new TCPServer(rsaEngine);
+            PacketDispatcher packetDispatcher = new PacketDispatcher();
+
+            this.tcpServer = new TCPServer(rsaEngine, packetDispatcher);
             Thread tcpThread = new Thread(tcpServer);
 
             tcpThread.start();

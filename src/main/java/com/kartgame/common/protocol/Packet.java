@@ -1,13 +1,14 @@
 package com.kartgame.common.protocol;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public abstract class Packet {
     public static final byte MAGIC_BYTE = 0x4B;
     public static final byte HEADER_SIZE = 8;
 
     private final PacketType type;
-    private int playerId; // ??
+    private int playerToken; // ??
 
     protected Packet(PacketType type) {
         this.type = type;
@@ -35,7 +36,7 @@ public abstract class Packet {
 
         buffer.put(MAGIC_BYTE);
         buffer.put(type.getId());
-        buffer.putInt(playerId);
+        buffer.putInt(playerToken);
         buffer.putShort(payloadLength);
 
         buffer.put(payloadBuffer);
@@ -49,7 +50,7 @@ public abstract class Packet {
         ByteBuffer buffer = ByteBuffer.allocate(Packet.HEADER_SIZE + payloadLength);
         buffer.put(MAGIC_BYTE);
         buffer.put(type.getId());
-        buffer.putInt(playerId);
+        buffer.putInt(playerToken);
         buffer.putShort(payloadLength);
 
         buffer.put(encryptedPayload);
@@ -66,23 +67,37 @@ public abstract class Packet {
         return payloadBytes;
     }
 
+    protected void writeString(ByteBuffer buffer, String s) {
+        // Write length of string + string
+        byte[] strBytes = s.getBytes(StandardCharsets.UTF_8);
+        buffer.putShort((short) strBytes.length);
+        buffer.put(strBytes);
+    }
+
+    protected String readString(ByteBuffer buffer) {
+        short strLen = buffer.getShort();
+        byte[] strBytes = new byte[strLen];
+        buffer.get(strBytes);
+        return new String(strBytes, StandardCharsets.UTF_8);
+    }
+
     public PacketType getType() {
         return type;
     }
 
-    public int getPlayerId() {
-        return playerId;
+    public int getPlayerToken() {
+        return playerToken;
     }
 
-    public void setPlayerId(int playerId) {
-        this.playerId = playerId;
+    public void setPlayerToken(int playerToken) {
+        this.playerToken = playerToken;
     }
 
     @Override
     public String toString() {
         return "Packet{" +
                 "type=" + type +
-                ", playerId=" + playerId +
+                ", playerId=" + playerToken +
                 '}';
     }
 }

@@ -4,6 +4,7 @@ import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.PacketRegistry;
 import com.kartgame.common.security.AESEngine;
 import com.kartgame.common.security.RSAEngineServer;
+import com.kartgame.server.packets.PacketDispatcher;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -15,6 +16,7 @@ import java.nio.ByteBuffer;
 
 public class TCPClientHandler implements Runnable {
     private final RSAEngineServer rsaEngine;
+    private final PacketDispatcher dispatcher;
     private final Socket socket;
     private final DataInputStream in;
     private final DataOutputStream out;
@@ -24,8 +26,9 @@ public class TCPClientHandler implements Runnable {
 
     private int playerToken = -1;
 
-    public TCPClientHandler(Socket socket, RSAEngineServer rsaEngine) throws IOException {
+    public TCPClientHandler(Socket socket, RSAEngineServer rsaEngine, PacketDispatcher dispatcher) throws IOException {
         this.rsaEngine = rsaEngine;
+        this.dispatcher = dispatcher;
         this.socket = socket;
         this.out = new DataOutputStream(socket.getOutputStream());
         this.in = new DataInputStream(socket.getInputStream());
@@ -73,7 +76,9 @@ public class TCPClientHandler implements Runnable {
 
                 Packet packet = PacketRegistry.parse(packetBuffer);
 
-                processPacket(packet);
+                if (packet != null) {
+                    dispatcher.dispatch(packet, this);
+                }
             }
         } catch (SecurityException e) {
             System.err.println("Security violation: " + e.getMessage());
@@ -83,13 +88,12 @@ public class TCPClientHandler implements Runnable {
             System.out.println("Client disconnected: " + socket);
         } catch (IOException e) {
             System.err.println("Client connection lost: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             close();
         }
-    }
-
-    private void processPacket(Packet packet) {
-        System.out.println("Received packet: " + packet);
     }
 
     private void executeHandshake() throws IOException {
@@ -110,6 +114,25 @@ public class TCPClientHandler implements Runnable {
         this.aesEngine = new AESEngine(aesKey);
     }
 
+    public void sendPacket(Packet packet) {
+        synchronized (this.out) {
+            try {
+                packet.setPlayerToken(this.playerToken);
+
+                byte[] payloadBytes = packet.serializePayload();
+
+                byte[] payloadEncrypted = aesEngine.encrypt(payloadBytes);
+                byte[] packetBytes = packet.serialize(payloadEncrypted);
+
+                out.write(packetBytes);
+                out.flush();
+            } catch (IOException e) {
+                System.err.println("Failed to send packet: " + e.getMessage());
+                close();
+            }
+        }
+    }
+
     public void close() {
         try {
             if (socket != null && !socket.isClosed()) {
@@ -118,5 +141,21 @@ public class TCPClientHandler implements Runnable {
         } catch (IOException e) {
             System.err.println("Error closing socket for " + socket.getRemoteSocketAddress());
         }
+    }
+
+    public boolean isAuthenticated() {
+        return playerToken != -1;
+    }
+
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public int getPlayerToken() {
+        return playerToken;
+    }
+
+    public void setPlayerToken(int playerToken) {
+        this.playerToken = playerToken;
     }
 }
