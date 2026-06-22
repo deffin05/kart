@@ -1,4 +1,7 @@
-package com.kartgame.common.protocol;
+package com.kartgame.common.protocol.packets;
+
+import com.kartgame.common.protocol.Packet;
+import com.kartgame.common.protocol.PacketType;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

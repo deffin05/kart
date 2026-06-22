@@ -1,5 +1,7 @@
 package com.kartgame.common.protocol;
 
+import com.kartgame.common.protocol.packets.C2S_LoginPacket;
+
 import java.nio.ByteBuffer;
 
 public class PacketRegistry {

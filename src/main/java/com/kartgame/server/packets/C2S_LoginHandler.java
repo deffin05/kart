@@ -1,6 +1,6 @@
 package com.kartgame.server.packets;
 
-import com.kartgame.common.protocol.C2S_LoginPacket;
+import com.kartgame.common.protocol.packets.C2S_LoginPacket;
 import com.kartgame.server.network.TCPClientHandler;
 
 import java.security.SecureRandom;
