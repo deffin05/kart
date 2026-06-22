@@ -15,6 +15,7 @@ public class C2S_LoginHandler implements PacketHandler<C2S_LoginPacket>{
 
         // TODO: submit this to the database thread pool and add DB authentication
         int token = random.nextInt(Integer.MAX_VALUE - 1) + 1;
+        System.out.println("Login recieved");
         client.setPlayerToken(token);
         client.sendPacket(new S2C_LoginResponse(token, "Success"));
     }

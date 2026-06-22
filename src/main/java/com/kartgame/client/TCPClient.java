@@ -12,38 +12,56 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 public class TCPClient {
-    public static void main(String[] args) throws IOException, InterruptedException {
-        AESEngine aesEngine = new AESEngine();
-        // Connect
-        InetAddress address = InetAddress.getLoopbackAddress();
-        Socket socket = new Socket(address, TCPServer.PORT);
-        DataInputStream in = new DataInputStream(socket.getInputStream());
-        DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+    private final AESEngine aesEngine;
+    private final RSAEngineClient rsaEngine;
+    private Socket socket;
+    private DataInputStream in;
+    private DataOutputStream out;
 
-        // Handshake: get RSA
+    public TCPClient() throws IOException {
+        this.aesEngine = new AESEngine();
+        this.rsaEngine = new RSAEngineClient();
+        connect();
+    }
+
+    private void connect() throws IOException {
+        InetAddress address = InetAddress.getLoopbackAddress();
+        socket = new Socket(address, TCPServer.PORT);
+        in = new DataInputStream(socket.getInputStream());
+        out = new DataOutputStream(socket.getOutputStream());
+
         int keyLength = in.readInt();
         byte[] rsaKey = new byte[keyLength];
         in.readFully(rsaKey);
 
-        RSAEngineClient rsaEngine = new RSAEngineClient();
         rsaEngine.loadServerPublicKey(rsaKey);
 
-        // Handshake: send AES
         byte[] aesKey = aesEngine.getRawKey();
         byte[] aesKeyEncrypted = rsaEngine.encryptAESKey(aesKey);
         out.writeInt(aesKeyEncrypted.length);
         out.write(aesKeyEncrypted);
         out.flush();
+    }
 
-        // Send packet
-        C2S_LoginPacket packet = new C2S_LoginPacket("login", "password123");
+    public void sendLogin(String username, String password) throws IOException {
+        C2S_LoginPacket packet = new C2S_LoginPacket(username, password);
         byte[] payload = packet.serializePayload();
         byte[] encryptedPayload = aesEngine.encrypt(payload);
-
         byte[] packetBytes = packet.serialize(encryptedPayload);
+
         out.write(packetBytes);
         out.flush();
+    }
 
-        socket.close();
+    public void close() throws IOException {
+        if (out != null) {
+            out.close();
+        }
+        if (in != null) {
+            in.close();
+        }
+        if (socket != null) {
+            socket.close();
+        }
     }
 }
