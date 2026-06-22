@@ -9,6 +9,7 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 public class TCPClientHandler implements Runnable {
     private final RSAEngineServer rsaEngine;
@@ -28,11 +29,16 @@ public class TCPClientHandler implements Runnable {
     @Override
     public void run() {
         try {
+            socket.setSoTimeout(10_000); // Timeout for handshake
             executeHandshake();
+
+            socket.setSoTimeout(60_000);
             while (!socket.isClosed() && !Thread.currentThread().isInterrupted()) {
                 byte[] header = new byte[Packet.HEADER_SIZE];
                 in.readFully(header);
             }
+        } catch (SocketTimeoutException e) {
+            System.out.println("Client timed out: " + socket);
         } catch (EOFException e) {
             System.out.println("Client disconnected: " + socket);
         } catch (IOException e) {
@@ -44,8 +50,8 @@ public class TCPClientHandler implements Runnable {
 
     private void executeHandshake() throws IOException {
         /* Write RSA key length (4 bytes) + RSA key
-        *  Receive AES key length (4 bytes) + AES key (encrypted)
-        * */
+         *  Receive AES key length (4 bytes) + AES key (encrypted)
+         * */
         byte[] rsaPublicKey = rsaEngine.getPublicKey();
 
         out.writeInt(rsaPublicKey.length);
