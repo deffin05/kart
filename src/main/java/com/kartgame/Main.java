@@ -1,5 +1,7 @@
 package com.kartgame;
 
+import com.kartgame.client.BaseController;
+import com.kartgame.client.TCPClient;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,7 +12,13 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/com/kartgame/client/FXML/Base.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/kartgame/client/FXML/Base.fxml"));
+        Parent root = loader.load();
+
+        BaseController controller = loader.getController();
+        TCPClient client = new TCPClient();
+        controller.setClient(client);
+
         stage.setTitle("Kart Game");
         stage.setScene(new Scene(root));
         stage.show();
