@@ -8,22 +8,22 @@ import java.nio.ByteBuffer;
 public class C2S_JoinLobbyPacket extends Packet {
     private int lobbyId;
 
-    protected C2S_JoinLobbyPacket(int lobbyId) {
+    public C2S_JoinLobbyPacket(int lobbyId) {
         super(PacketType.C2S_JOIN_LOBBY);
         this.lobbyId = lobbyId;
     }
 
-    protected C2S_JoinLobbyPacket() {
+    public C2S_JoinLobbyPacket() {
         super(PacketType.C2S_JOIN_LOBBY);
     }
 
     @Override
-    protected void writePayload(ByteBuffer buffer) {
+    public void writePayload(ByteBuffer buffer) {
         buffer.putInt(lobbyId);
     }
 
     @Override
-    protected void readPayload(ByteBuffer buffer, short length) {
+    public void readPayload(ByteBuffer buffer, short length) {
         this.lobbyId = buffer.getInt();
     }
 
