@@ -1,9 +1,11 @@
 package com.kartgame.client;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
@@ -20,17 +22,22 @@ public class BaseController implements Initializable {
     @FXML private VBox mainMenuBox;
     @FXML private TextField lgnForm;
     @FXML private PasswordField pswrdForm;
+    @FXML private Label loginStatusLabel;
+    @FXML private Label nicknameLabel;
 
     private TCPClient client;
+    private String lastLoginUsername;
 
     public void setClient(TCPClient client) {
         this.client = client;
+        this.client.setLoginResponseListener(this::handleLoginResponse);
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         logInForm.setVisible(false);
         logInForm.setDisable(true);
+        loginStatusLabel.setText("");
     }
 
     @FXML
@@ -47,25 +54,46 @@ public class BaseController implements Initializable {
         String password = pswrdForm.getText();
 
         if (username.isEmpty()) {
-            System.err.println("Username is required.");
+            loginStatusLabel.setText("Username is required.");
             return;
         }
 
         if (client == null) {
-            System.err.println("TCP client is not initialized.");
+            loginStatusLabel.setText("Client connection is not ready.");
             return;
         }
 
+        lastLoginUsername = username;
         try {
             client.sendLogin(username, password);
-            System.out.println("Login packet sent for user: " + username);
+            loginStatusLabel.setText("Login packet sent...");
         } catch (IOException ex) {
+            loginStatusLabel.setText("Failed to send login: " + ex.getMessage());
             ex.printStackTrace();
         }
+    }
 
-        logInForm.setVisible(false);
-        logInForm.setDisable(true);
-        mainMenuBox.setDisable(false);
-        mainMenuBox.setVisible(true);
+    private void handleLoginResponse(com.kartgame.common.protocol.packets.S2C_LoginResponse response) {
+        Platform.runLater(() -> {
+            if (response.getToken() > 0) {
+                if (lastLoginUsername != null && !lastLoginUsername.isEmpty()) {
+                    nicknameLabel.setText(lastLoginUsername);
+                }
+                loginStatusLabel.setText("Login successful: " + response.getMessage());
+                logInForm.setVisible(false);
+                logInForm.setDisable(true);
+                mainMenuBox.setVisible(true);
+                mainMenuBox.setDisable(false);
+
+                try {
+                    client.sendPlayerInfoReq();
+                    client.sendLobbyInfoReq();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                loginStatusLabel.setText(response.getMessage());
+            }
+        });
     }
 }
