@@ -16,7 +16,7 @@ public class PasswordHasher {
 
     private static final SecureRandom random = new SecureRandom();
 
-    public String hashPassword(String password) {
+    public static String hashPassword(String password) {
         byte[] salt = new byte[SALT_SIZE_BYTES];
         random.nextBytes(salt);
 
@@ -27,7 +27,7 @@ public class PasswordHasher {
         return saltBase64 + ":" + hashBase64;
     }
 
-    public boolean verifyPassword(String password, String passwordHash) {
+    public static boolean verifyPassword(String password, String passwordHash) {
         String[] parts = passwordHash.split(":");
         if (parts.length != 2) {
             System.err.println("Invalid password hash received");

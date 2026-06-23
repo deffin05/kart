@@ -2,6 +2,7 @@ package com.kartgame.server.packets;
 
 import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.PacketType;
+import com.kartgame.server.database.DatabaseManager;
 import com.kartgame.server.network.TCPClientHandler;
 
 import java.util.HashMap;
@@ -9,8 +10,8 @@ import java.util.Map;
 
 public class PacketDispatcher {
     private final Map<PacketType, PacketHandler<? extends Packet>> handlers = new HashMap<>();
-    public PacketDispatcher() {
-        handlers.put(PacketType.C2S_LOGIN, new C2S_LoginHandler());
+    public PacketDispatcher(DatabaseManager db) {
+        handlers.put(PacketType.C2S_LOGIN, new C2S_LoginHandler(db));
     }
 
     @SuppressWarnings("unchecked")
