@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
@@ -18,10 +19,23 @@ import java.util.ResourceBundle;
 public class BaseController implements Initializable {
     @FXML private Button lgInBtn;
     @FXML private Button lgInFormBtn;
+    @FXML private Button joinLobbyBtn;
+    @FXML private Button createLobbyBtn;
+    @FXML private Button joinLobbyFormBtn;
+
     @FXML private Pane logInForm;
+    @FXML private Pane joinLobby;
+
     @FXML private VBox mainMenuBox;
+
+    @FXML private StackPane menuPane;
+    @FXML private StackPane lobbyPane;
+
     @FXML private TextField lgnForm;
+    @FXML private TextField lobbyId;
+
     @FXML private PasswordField pswrdForm;
+
     @FXML private Label loginStatusLabel;
     @FXML private Label nicknameLabel;
 
@@ -95,5 +109,31 @@ public class BaseController implements Initializable {
                 loginStatusLabel.setText(response.getMessage());
             }
         });
+    }
+
+    @FXML
+    private void onCreateLobbyBtnClick() {
+        // TODO: Handle button click
+        menuPane.setVisible(false);
+        menuPane.setDisable(true);
+        lobbyPane.setVisible(true);
+        lobbyPane.setDisable(false);
+    }
+
+    @FXML
+    private void onJoinLobbyBtnClick() {
+        joinLobby.setVisible(true);
+        joinLobby.setDisable(false);
+        mainMenuBox.setDisable(true);
+        mainMenuBox.setVisible(false);
+    }
+
+    @FXML
+    private void onJoinLobbyFormBtnClick() {
+        // TODO: Handle button click
+        menuPane.setVisible(false);
+        menuPane.setDisable(true);
+        lobbyPane.setVisible(true);
+        lobbyPane.setDisable(false);
     }
 }
