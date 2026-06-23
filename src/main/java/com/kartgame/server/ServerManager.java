@@ -1,11 +1,14 @@
 package com.kartgame.server;
 
 import com.kartgame.common.security.RSAEngineServer;
+import com.kartgame.server.database.DatabaseManager;
 import com.kartgame.server.network.TCPServer;
 import com.kartgame.server.packets.PacketDispatcher;
 
 public class ServerManager {
     private TCPServer tcpServer;
+    private DatabaseManager dbManager;
+
     public static void main(String[] args) {
         new ServerManager().boot();
     }
@@ -19,7 +22,10 @@ public class ServerManager {
             RSAEngineServer rsaEngine = new RSAEngineServer();
             rsaEngine.generateKeyPair();
 
-            PacketDispatcher packetDispatcher = new PacketDispatcher();
+            dbManager = new DatabaseManager();
+            dbManager.init();
+
+            PacketDispatcher packetDispatcher = new PacketDispatcher(dbManager);
 
             this.tcpServer = new TCPServer(rsaEngine, packetDispatcher);
             Thread tcpThread = new Thread(tcpServer);
@@ -36,5 +42,6 @@ public class ServerManager {
         System.out.println("Initiating shutdown");
 
         tcpServer.stop();
+        dbManager.shutdown();
     }
 }
