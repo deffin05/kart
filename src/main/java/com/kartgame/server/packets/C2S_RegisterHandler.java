@@ -17,7 +17,7 @@ public class C2S_RegisterHandler implements PacketHandler<C2S_RegisterPacket>{
     }
 
     @Override
-    public void handle(C2S_LoginPacket packet, TCPClientHandler client) {
+    public void handle(C2S_RegisterPacket packet, TCPClientHandler client) {
         String username = packet.getUsername();
         String password = packet.getPassword();
 
