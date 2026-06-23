@@ -3,16 +3,19 @@ package com.kartgame.server.packets;
 import com.kartgame.common.protocol.packets.C2S_LoginPacket;
 import com.kartgame.common.protocol.packets.S2C_LoginResponse;
 import com.kartgame.server.database.DatabaseManager;
+import com.kartgame.server.lobby.LobbyManager;
 import com.kartgame.server.network.TCPClientHandler;
 
 import java.security.SecureRandom;
 
 public class C2S_LoginHandler implements PacketHandler<C2S_LoginPacket>{
     private final DatabaseManager db;
+    private final LobbyManager lobbyManager;
     private SecureRandom random = new SecureRandom();
 
-    public C2S_LoginHandler(DatabaseManager db) {
+    public C2S_LoginHandler(DatabaseManager db, LobbyManager lobbyManager) {
         this.db = db;
+        this.lobbyManager = lobbyManager;
     }
 
     @Override
