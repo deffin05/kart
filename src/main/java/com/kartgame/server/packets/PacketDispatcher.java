@@ -12,6 +12,7 @@ public class PacketDispatcher {
     private final Map<PacketType, PacketHandler<? extends Packet>> handlers = new HashMap<>();
     public PacketDispatcher(DatabaseManager db) {
         handlers.put(PacketType.C2S_LOGIN, new C2S_LoginHandler(db));
+        handlers.put(PacketType.C2S_REGISTER, new C2S_RegisterHandler(db));
     }
 
     @SuppressWarnings("unchecked")
