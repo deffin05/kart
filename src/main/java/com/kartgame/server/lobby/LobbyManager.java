@@ -1,5 +1,7 @@
 package com.kartgame.server.lobby;
 
+import com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket;
+
 import java.security.SecureRandom;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -66,7 +68,7 @@ public class LobbyManager {
                 lobbyMap.remove(lobbyId);
                 System.out.println("Lobby " + lobbyId + " destroyed.");
             } else {
-                // TODO: Broadcast S2C_LobbyInfo packet
+                lobby.broadcast(new S2C_LobbyInfoPacket(lobbyId, lobby.getLobbyUsernames()));
             }
         }
     }
