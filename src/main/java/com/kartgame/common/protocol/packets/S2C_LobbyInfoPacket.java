@@ -44,4 +44,19 @@ public class S2C_LobbyInfoPacket extends Packet {
         }
     }
 
+    public int getLobbyId() {
+        return lobbyId;
+    }
+
+    public void setLobbyId(int lobbyId) {
+        this.lobbyId = lobbyId;
+    }
+
+    public List<String> getPlayerUsernames() {
+        return playerUsernames;
+    }
+
+    public void setPlayerUsernames(List<String> playerUsernames) {
+        this.playerUsernames = playerUsernames;
+    }
 }
