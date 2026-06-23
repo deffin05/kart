@@ -27,14 +27,16 @@
   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-  THEORY OF LIABILITY, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-  POSSIBILITY OF SUCH DAMAGE.
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
@@ -42,77 +44,98 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Rectangle?>
 
-
-<StackPane xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kartgame.client.BaseController">
    <children>
-      <VBox>
+      <StackPane>
          <children>
-          <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0">
+            <VBox fx:id="mainMenuBox">
                <children>
-                  <SplitPane dividerPositions="0.29797979797979796" layoutY="-1.0" prefHeight="400.0" prefWidth="640.0">
-                    <items>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-                           <children>
-                              <Button layoutX="36.0" layoutY="124.0" mnemonicParsing="false" text="Create Lobby" />
-                              <Label layoutX="40.0" layoutY="52.0" text="Kart" />
-                              <Button layoutX="36.0" layoutY="162.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="86.0" text="Join Lobby" />
-                              <Button layoutX="36.0" layoutY="199.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="86.0" text="Sign in" />
-                              <Button layoutX="36.0" layoutY="239.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="86.0" text="Join Lobby" />
-                              <Label layoutX="22.0" layoutY="367.0" text="Nickname" />
-                           </children>
-                        </AnchorPane>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
-                    </items>
-                  </SplitPane>
-               </children>
-          </AnchorPane>
-         </children>
-      </VBox>
-      <VBox disable="true" prefHeight="400.0" prefWidth="640.0" visible="false">
-        <children>
-            <AnchorPane prefHeight="400.0" prefWidth="640.0">
-               <children>
-                  <Button layoutX="300.0" layoutY="346.0" mnemonicParsing="false" text="Start" />
-                  <Label layoutX="304.0" layoutY="23.0" text="Lobby" />
-                  <Label layoutX="68.0" layoutY="287.0" text="Nickname1" />
-                  <Label layoutX="205.0" layoutY="287.0" text="Nickname2" />
-                  <Label layoutX="360.0" layoutY="287.0" text="Nickname3" />
-                  <Label layoutX="500.0" layoutY="287.0" text="Nickname4" />
-               </children>
-            </AnchorPane>
-        </children>
-      </VBox>
-      <VBox disable="true" prefHeight="200.0" prefWidth="100.0" visible="false">
-         <children>
-            <AnchorPane prefHeight="400.0" prefWidth="640.0">
-               <children>
-                  <HBox prefHeight="400.0" prefWidth="640.0">
+                <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0">
                      <children>
-                        <Pane prefHeight="400.0" prefWidth="160.0">
-                           <children>
-                              <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" layoutX="63.0" layoutY="300.0" stroke="BLACK" strokeType="INSIDE" width="33.0" />
-                           </children>
-                        </Pane>
-                        <Pane prefHeight="400.0" prefWidth="160.0">
-                           <children>
-                              <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" layoutX="63.0" layoutY="301.0" stroke="BLACK" strokeType="INSIDE" width="33.0" />
-                           </children>
-                        </Pane>
-                        <Pane prefHeight="400.0" prefWidth="160.0">
-                           <children>
-                              <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" layoutX="64.0" layoutY="299.0" stroke="BLACK" strokeType="INSIDE" width="33.0" />
-                           </children>
-                        </Pane>
-                        <Pane prefHeight="400.0" prefWidth="160.0">
-                           <children>
-                              <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" layoutX="64.0" layoutY="300.0" stroke="BLACK" strokeType="INSIDE" width="33.0" />
-                           </children>
-                        </Pane>
+                        <SplitPane dividerPositions="0.29797979797979796" layoutY="-1.0" prefHeight="400.0" prefWidth="640.0">
+                          <items>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                 <children>
+                                    <Button layoutX="36.0" layoutY="124.0" mnemonicParsing="false" text="Create Lobby" />
+                                    <Label layoutX="40.0" layoutY="52.0" text="Kart" />
+                                    <Button layoutX="36.0" layoutY="162.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="86.0" text="Join Lobby" />
+                                    <Button layoutX="36.0" layoutY="199.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="86.0" text="Sign in" />
+                                    <Button fx:id="lgInBtn" layoutX="36.0" layoutY="239.0" mnemonicParsing="false" onAction="#onLgInBtnClick" prefHeight="26.0" prefWidth="86.0" text="Log In" />
+                                    <Label fx:id="nicknameLabel" layoutX="22.0" layoutY="367.0" text="Nickname" />
+                                 </children>
+                              </AnchorPane>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+                          </items>
+                        </SplitPane>
                      </children>
-                  </HBox>
+                </AnchorPane>
                </children>
-            </AnchorPane>
+            </VBox>
+            <Pane fx:id="logInForm" disable="true" prefHeight="400.0" prefWidth="554.0" visible="false">
+               <children>
+                  <Button fx:id="lgInFormBtn" layoutX="283.0" layoutY="239.0" mnemonicParsing="false" onAction="#onLgInFormBtnClick" text="Log In" />
+                  <PasswordField fx:id="pswrdForm" layoutX="283.0" layoutY="186.0" />
+                  <TextField fx:id="lgnForm" layoutX="283.0" layoutY="136.0" />
+                  <Label layoutX="208.0" layoutY="190.0" text="Password" />
+                  <Label layoutX="208.0" layoutY="140.0" text="Login" />
+                  <Label fx:id="loginStatusLabel" layoutX="208.0" layoutY="270.0" text="" />
+               </children>
+            </Pane>
          </children>
-      </VBox>
+      </StackPane>
+      <StackPane disable="true" visible="false">
+         <children>
+            <VBox prefHeight="400.0" prefWidth="640.0">
+              <children>
+                  <AnchorPane prefHeight="400.0" prefWidth="640.0">
+                     <children>
+                        <Button layoutX="300.0" layoutY="346.0" mnemonicParsing="false" text="Start" />
+                        <Label layoutX="304.0" layoutY="23.0" text="Lobby" />
+                        <Label layoutX="68.0" layoutY="287.0" text="Nickname1" />
+                        <Label layoutX="205.0" layoutY="287.0" text="Nickname2" />
+                        <Label layoutX="360.0" layoutY="287.0" text="Nickname3" />
+                        <Label layoutX="500.0" layoutY="287.0" text="Nickname4" />
+                     </children>
+                  </AnchorPane>
+              </children>
+            </VBox>
+         </children>
+      </StackPane>
+      <StackPane disable="true" visible="false">
+         <children>
+            <VBox prefHeight="200.0" prefWidth="100.0">
+               <children>
+                  <AnchorPane prefHeight="400.0" prefWidth="640.0">
+                     <children>
+                        <HBox prefHeight="400.0" prefWidth="640.0">
+                           <children>
+                              <Pane prefHeight="400.0" prefWidth="160.0">
+                                 <children>
+                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" layoutX="63.0" layoutY="300.0" stroke="BLACK" strokeType="INSIDE" width="33.0" />
+                                 </children>
+                              </Pane>
+                              <Pane prefHeight="400.0" prefWidth="160.0">
+                                 <children>
+                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" layoutX="63.0" layoutY="301.0" stroke="BLACK" strokeType="INSIDE" width="33.0" />
+                                 </children>
+                              </Pane>
+                              <Pane prefHeight="400.0" prefWidth="160.0">
+                                 <children>
+                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" layoutX="64.0" layoutY="299.0" stroke="BLACK" strokeType="INSIDE" width="33.0" />
+                                 </children>
+                              </Pane>
+                              <Pane prefHeight="400.0" prefWidth="160.0">
+                                 <children>
+                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" layoutX="64.0" layoutY="300.0" stroke="BLACK" strokeType="INSIDE" width="33.0" />
+                                 </children>
+                              </Pane>
+                           </children>
+                        </HBox>
+                     </children>
+                  </AnchorPane>
+               </children>
+            </VBox>
+         </children>
+      </StackPane>
    </children>
 </StackPane>
