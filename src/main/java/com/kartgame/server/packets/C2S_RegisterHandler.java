@@ -1,31 +1,32 @@
 package com.kartgame.server.packets;
 
 import com.kartgame.common.protocol.packets.C2S_LoginPacket;
+import com.kartgame.common.protocol.packets.C2S_RegisterPacket;
 import com.kartgame.common.protocol.packets.S2C_LoginResponse;
 import com.kartgame.server.database.DatabaseManager;
 import com.kartgame.server.network.TCPClientHandler;
 
 import java.security.SecureRandom;
 
-public class C2S_LoginHandler implements PacketHandler<C2S_LoginPacket>{
+public class C2S_RegisterHandler implements PacketHandler<C2S_RegisterPacket>{
     private final DatabaseManager db;
     private SecureRandom random = new SecureRandom();
 
-    public C2S_LoginHandler(DatabaseManager db) {
+    public C2S_RegisterHandler(DatabaseManager db) {
         this.db = db;
     }
 
     @Override
-    public void handle(C2S_LoginPacket packet, TCPClientHandler client) {
+    public void handle(C2S_RegisterPacket packet, TCPClientHandler client) {
         String username = packet.getUsername();
         String password = packet.getPassword();
 
         db.execute(() -> {
             try {
-                boolean authenticated = db.authenticate(username, password);
+                boolean registred = db.registerUser(username, password);
 
-                if (!authenticated) {
-                    client.sendPacket(new S2C_LoginResponse(-1, "Invalid login credentials."));
+                if (!registred) {
+                    client.sendPacket(new S2C_LoginResponse(-1, "Failed to create user account."));
                     return;
                 }
 
@@ -36,7 +37,7 @@ public class C2S_LoginHandler implements PacketHandler<C2S_LoginPacket>{
 
                 client.sendPacket(new S2C_LoginResponse(token, "Success"));
             } catch (Exception e) {
-                System.err.println("Error processing login for " + username);
+                System.err.println("Error processing registration for " + username);
                 e.printStackTrace();
                 client.sendPacket(new S2C_LoginResponse(-1, "Internal server error."));
             }
