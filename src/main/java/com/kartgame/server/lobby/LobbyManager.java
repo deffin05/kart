@@ -80,4 +80,11 @@ public class LobbyManager {
         return code;
     }
 
+    public ConcurrentHashMap<Integer, Player> getPlayerMap() {
+        return playerMap;
+    }
+
+    public ConcurrentHashMap<Integer, Lobby> getLobbyMap() {
+        return lobbyMap;
+    }
 }
