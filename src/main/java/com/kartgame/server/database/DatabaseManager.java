@@ -117,4 +117,23 @@ public class DatabaseManager {
             return false;
         }
     }
+
+    public int getUserId(String username) {
+        String query = "SELECT id FROM Users WHERE username = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setString(1, username);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Invalid user requested");
+        }
+        return -1;
+    }
 }

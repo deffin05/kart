@@ -2,6 +2,8 @@ package com.kartgame.server.lobby;
 
 import com.kartgame.common.protocol.Packet;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Lobby {
@@ -30,6 +32,16 @@ public class Lobby {
     public synchronized void removePlayer(Player player) {
         players.remove(player);
         player.setCurrentLobbyId(null);
+    }
+
+    public List<String> getLobbyUsernames() {
+        List<String> list = new ArrayList<>();
+
+        for (Player player : players) {
+            list.add(player.getUsername());
+        }
+
+        return list;
     }
 
     public boolean canStart() {

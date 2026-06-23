@@ -6,7 +6,7 @@ public enum PacketType {
     C2S_LOGIN(1),
     S2C_LOGIN_RESPONSE(2),
     C2S_REGISTER(3),
-//    C2S_REGISTER(3),
+    S2C_LOBBY_INFO(3),
     C2S_JOIN_LOBBY(5),
     C2S_START_LOBBY(6),
     C2S_PING(10),

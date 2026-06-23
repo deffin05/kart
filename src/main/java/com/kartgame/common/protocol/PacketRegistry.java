@@ -1,6 +1,9 @@
 package com.kartgame.common.protocol;
 
 import com.kartgame.common.protocol.packets.C2S_LoginPacket;
+import com.kartgame.common.protocol.packets.C2S_RegisterPacket;
+import com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket;
+import com.kartgame.common.protocol.packets.S2C_LoginResponse;
 
 import java.nio.ByteBuffer;
 
@@ -29,6 +32,15 @@ public class PacketRegistry {
         switch (type) {
             case C2S_LOGIN:
                 packet = new C2S_LoginPacket();
+                break;
+            case S2C_LOGIN_RESPONSE:
+                packet = new S2C_LoginResponse();
+                break;
+            case C2S_REGISTER:
+                packet = new C2S_RegisterPacket();
+                break;
+            case S2C_LOBBY_INFO:
+                packet = new S2C_LobbyInfoPacket();
                 break;
             default:
                 throw new UnsupportedOperationException("Unimplemented packet type: " + type);
