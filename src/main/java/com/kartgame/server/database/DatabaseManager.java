@@ -29,10 +29,12 @@ public class DatabaseManager {
                     """);
 
             // Some high scores table or something
-//            String createScoresTable = """
-//                        );
-//                    """;
-//            stmt.execute(createScoresTable);
+            String createScoresTable = """
+                    CREATE TABLE IF NOT EXISTS BattleLog (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    )
+                    """;
+            stmt.execute(createScoresTable);
 
             System.out.println("Database initialized successfully.");
         } catch (SQLException e) {
@@ -66,7 +68,9 @@ public class DatabaseManager {
 
     // Database queries
 
-
+    public boolean authenticate(String username, String password) {
+        return false;
+    }
 
 
 
