@@ -23,12 +23,15 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 
 public class TCPClient {
     private final AESEngine aesEngine;
     private final RSAEngineClient rsaEngine;
     private final PacketDispatcher packetDispatcher;
+    private final ScheduledExecutorService pingScheduler = Executors.newSingleThreadScheduledExecutor();
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
@@ -64,6 +67,14 @@ public class TCPClient {
         out.writeInt(aesKeyEncrypted.length);
         out.write(aesKeyEncrypted);
         out.flush();
+
+        pingScheduler.submit(() -> {
+            try {
+                sendPing();
+            } catch (IOException e) {
+                System.err.println("Failed to send ping");
+            }
+        });
 
         startReader();
     }
@@ -185,10 +196,26 @@ public class TCPClient {
         this.loginTag = loginTag;
     }
 
+    private void sendPing() throws IOException {
+        ByteBuffer buf = ByteBuffer.allocate(8);
+        buf.put(Packet.MAGIC_BYTE);
+        buf.put(PacketType.PING.getId());
+        buf.putInt(loginTag);
+        buf.putShort((short) 0);
+        buf.flip();
+        byte[] pingPacket = buf.array();
+
+        out.write(pingPacket);
+        out.flush();
+    }
+
     public void close() throws IOException {
         running = false;
         if (readerThread != null) {
             readerThread.interrupt();
+        }
+        if (!pingScheduler.isShutdown()) {
+            pingScheduler.shutdown();
         }
         if (out != null) {
             out.close();
