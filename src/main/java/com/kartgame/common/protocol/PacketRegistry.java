@@ -30,6 +30,7 @@ public class PacketRegistry {
             case C2S_REGISTER -> new C2S_RegisterPacket();
             case S2C_LOBBY_INFO -> new S2C_LobbyInfoPacket();
             case C2S_JOIN_LOBBY -> new C2S_JoinLobbyPacket();
+            case C2S_CREATE_LOBBY -> new C2S_JoinLobbyPacket();
             case C2S_START_LOBBY -> new C2S_LobbyStartPacket();
             case S2C_GAME_STARTED -> new S2C_GameStartedPacket();
             case C2S_USER_INPUT -> new C2S_UserInput();
