@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Main extends Application {
+    private TCPClient client;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -16,12 +17,18 @@ public class Main extends Application {
         Parent root = loader.load();
 
         BaseController controller = loader.getController();
-        TCPClient client = new TCPClient();
+        this.client = new TCPClient();
         controller.setClient(client);
 
         stage.setTitle("Kart Game");
         stage.setScene(new Scene(root));
         stage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        this.client.close();
+        super.stop();
     }
 
     public static void main(String[] args) {
