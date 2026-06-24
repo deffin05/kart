@@ -25,6 +25,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class TCPClient {
@@ -68,13 +69,13 @@ public class TCPClient {
         out.write(aesKeyEncrypted);
         out.flush();
 
-        pingScheduler.submit(() -> {
+        pingScheduler.scheduleAtFixedRate(() -> {
             try {
                 sendPing();
             } catch (IOException e) {
                 System.err.println("Failed to send ping");
             }
-        });
+        }, 30, 30, TimeUnit.SECONDS);
 
         startReader();
     }
