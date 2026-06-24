@@ -37,6 +37,7 @@ public class ServerManager {
             this.udpServer = new UDPServer(lobbyManager);
 
             lobbyManager.setUdpServer(udpServer);
+            lobbyManager.setDb(dbManager);
             Thread tcpThread = new Thread(tcpServer);
             Thread udpThread = new Thread(udpServer);
 
