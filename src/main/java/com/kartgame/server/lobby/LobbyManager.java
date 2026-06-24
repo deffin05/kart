@@ -1,13 +1,20 @@
 package com.kartgame.server.lobby;
 
+import com.kartgame.common.protocol.packets.S2C_GameStartedPacket;
 import com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket;
+import com.kartgame.server.game.GameSession;
 
 import java.security.SecureRandom;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.*;
 
 public class LobbyManager {
     private final ConcurrentHashMap<Integer, Player> playerMap = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Integer, Lobby> lobbyMap =  new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, GameSession> activeSessions = new ConcurrentHashMap<>();
+
+    private final ScheduledExecutorService gameLoopScheduler = Executors.newScheduledThreadPool(4);
 
     private final SecureRandom random = new SecureRandom();
 
@@ -88,5 +95,40 @@ public class LobbyManager {
 
     public ConcurrentHashMap<Integer, Lobby> getLobbyMap() {
         return lobbyMap;
+    }
+
+    public synchronized void startMatch(int lobbyId) {
+        Lobby lobby = lobbyMap.get(lobbyId);
+        if (lobby == null || lobby.isGameStarted()) return;
+
+        Map<Integer, Player> sessionPlayers = new HashMap<>();
+        for (Player p : lobby.getPlayers()) {
+            sessionPlayers.put(p.getToken(), p);
+        }
+
+        GameSession session = new GameSession(lobbyId, sessionPlayers);
+        activeSessions.put(lobbyId, session);
+
+        lobby.setGameStarted(true);
+
+        ScheduledFuture<?> future = gameLoopScheduler.scheduleAtFixedRate(
+                session::tick, 0, 20, TimeUnit.MILLISECONDS
+        );
+        session.setGameLoopFuture(future);
+
+        lobby.broadcast(new S2C_GameStartedPacket());
+        System.out.println("Match started for Lobby " + lobbyId);
+    }
+
+    public void shutdown() {
+        System.out.println("Stopping Game Loop Scheduler...");
+        gameLoopScheduler.shutdown();
+        try {
+            if (!gameLoopScheduler.awaitTermination(2, TimeUnit.SECONDS)) {
+                gameLoopScheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            gameLoopScheduler.shutdownNow();
+        }
     }
 }

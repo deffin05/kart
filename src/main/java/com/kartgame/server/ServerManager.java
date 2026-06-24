@@ -11,6 +11,7 @@ public class ServerManager {
     private TCPServer tcpServer;
     private UDPServer udpServer;
     private DatabaseManager dbManager;
+    private LobbyManager lobbyManager;
 
     public static void main(String[] args) {
         new ServerManager().boot();
@@ -28,7 +29,7 @@ public class ServerManager {
             dbManager = new DatabaseManager();
             dbManager.init();
 
-            LobbyManager lobbyManager = new LobbyManager();
+            lobbyManager = new LobbyManager();
 
             PacketDispatcher packetDispatcher = new PacketDispatcher(dbManager, lobbyManager);
 
@@ -49,6 +50,7 @@ public class ServerManager {
 
         tcpServer.stop();
         udpServer.stop();
+        lobbyManager.shutdown();
         dbManager.shutdown();
     }
 }
