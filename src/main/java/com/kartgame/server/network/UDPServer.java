@@ -32,6 +32,7 @@ public class UDPServer implements Runnable {
         socket = new DatagramSocket(PORT);
         this.lobbyManager = lobbyManager;
         this.udpThreadPool = Executors.newFixedThreadPool(8);
+        startUdpKeepAliveLoop();
 
         System.out.println("UDP server started");
     }
@@ -125,16 +126,18 @@ public class UDPServer implements Runnable {
         }, 30, 30, TimeUnit.SECONDS);
     }
 
-    private void sendUdpKeepAlive(Player player) {
-        try {
-            ByteBuffer buffer = ByteBuffer.allocate(Packet.HEADER_SIZE);
-            buffer.put(Packet.MAGIC_BYTE);
-            buffer.put(PacketType.PING.getId());
-            buffer.putInt(player.getToken());
-            buffer.putShort((short) 0);
-            buffer.flip();
+    private void sendUdpPacket(Packet packet, Player player) {
+        packet.setPlayerToken(player.getToken());
+        byte[] payloadBytes = packet.serializePayload();
 
-            byte[] data = buffer.array();
+        byte[] payloadEncrypted = player.getTcpHandler().getAesEngine().encrypt(payloadBytes);
+        byte[] packetBytes = packet.serialize(payloadEncrypted);
+
+        sendUdpPacket(packetBytes, player);
+    }
+
+    private void sendUdpPacket(byte[] data, Player player) {
+        try {
             DatagramPacket packet = new DatagramPacket(
                     data,
                     data.length,
@@ -143,10 +146,21 @@ public class UDPServer implements Runnable {
             );
 
             socket.send(packet);
-
         } catch (IOException e) {
-            System.err.println("Failed to send UDP Keep-Alive to " + player.getUsername());
+            if (running)
+                System.err.println("Failed to send packet to " + player.getUsername());
         }
+    }
+
+    private void sendUdpKeepAlive(Player player) {
+        ByteBuffer buffer = ByteBuffer.allocate(Packet.HEADER_SIZE);
+        buffer.put(Packet.MAGIC_BYTE);
+        buffer.put(PacketType.PING.getId());
+        buffer.putInt(player.getToken());
+        buffer.putShort((short) 0);
+        buffer.flip();
+
+        sendUdpPacket(buffer.array(), player);
     }
 
     public void stop() {
