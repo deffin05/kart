@@ -11,6 +11,7 @@ public class ServerManager {
     private TCPServer tcpServer;
     private UDPServer udpServer;
     private DatabaseManager dbManager;
+    private LobbyManager lobbyManager;
 
     public static void main(String[] args) {
         new ServerManager().boot();
@@ -28,15 +29,20 @@ public class ServerManager {
             dbManager = new DatabaseManager();
             dbManager.init();
 
-            LobbyManager lobbyManager = new LobbyManager();
+            lobbyManager = new LobbyManager();
 
             PacketDispatcher packetDispatcher = new PacketDispatcher(dbManager, lobbyManager);
 
             this.tcpServer = new TCPServer(rsaEngine, packetDispatcher);
             this.udpServer = new UDPServer(lobbyManager);
+
+            lobbyManager.setUdpServer(udpServer);
+            lobbyManager.setDb(dbManager);
             Thread tcpThread = new Thread(tcpServer);
+            Thread udpThread = new Thread(udpServer);
 
             tcpThread.start();
+            udpThread.start();
         } catch (Exception e) {
             System.err.println("Server failed to start.");
             e.printStackTrace();
@@ -49,6 +55,7 @@ public class ServerManager {
 
         tcpServer.stop();
         udpServer.stop();
+        lobbyManager.shutdown();
         dbManager.shutdown();
     }
 }

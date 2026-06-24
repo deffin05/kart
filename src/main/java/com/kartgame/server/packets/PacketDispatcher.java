@@ -17,6 +17,7 @@ public class PacketDispatcher {
         handlers.put(PacketType.C2S_CREATE_LOBBY, new CreateLobbyHandler(lobbyManager));
         handlers.put(PacketType.C2S_JOIN_LOBBY, new JoinLobbyHandler(lobbyManager));
         handlers.put(PacketType.C2S_LEAVE_LOBBY, new LeaveLobbyHandler(lobbyManager));
+        handlers.put(PacketType.C2S_START_LOBBY, new StartGameHandler(lobbyManager));
     }
 
     @SuppressWarnings("unchecked")

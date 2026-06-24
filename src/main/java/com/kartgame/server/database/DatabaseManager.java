@@ -1,6 +1,10 @@
 package com.kartgame.server.database;
 
 import java.sql.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -116,6 +120,40 @@ public class DatabaseManager {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public void insertBattleLog(int winner_id, long time, List<Integer> players) {
+        String queryBattleLog = "INSERT INTO BattleLog (winner_id, battle_date, duration_milis) VALUES (?, ?, ?)";
+        Integer log_id = null;
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(queryBattleLog)) {
+
+            LocalDateTime now = LocalDateTime.now();
+            pstmt.setInt(1, winner_id);
+            pstmt.setObject(2, now);
+            pstmt.setLong(3, time);
+
+            log_id = pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (log_id == null) return;;
+        String queryLogUser = "INSERT INTO LogUser (player_id, log_id) VALUES (?, ?)";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(queryLogUser)) {
+
+            for (int playerId : players) {
+                pstmt.setInt(1, playerId);
+                pstmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public int getUserId(String username) {
