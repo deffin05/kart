@@ -8,6 +8,7 @@ import com.kartgame.common.protocol.PacketRegistry;
 import com.kartgame.common.protocol.PacketType;
 import com.kartgame.common.protocol.packets.C2S_CreateLobbyPacket;
 import com.kartgame.common.protocol.packets.C2S_JoinLobbyPacket;
+import com.kartgame.common.protocol.packets.C2S_LeaveLobbyPacket;
 import com.kartgame.common.protocol.packets.C2S_LoginPacket;
 import com.kartgame.common.protocol.packets.C2S_RegisterPacket;
 import com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket;
@@ -153,6 +154,11 @@ public class TCPClient {
 
     public void sendJoinLobby(int lobbyId) throws IOException {
         C2S_JoinLobbyPacket packet = new C2S_JoinLobbyPacket(lobbyId);
+        sendPacket(packet);
+    }
+
+    public void sendLeaveLobby() throws IOException {
+        C2S_LeaveLobbyPacket packet = new C2S_LeaveLobbyPacket();
         sendPacket(packet);
     }
 

@@ -45,6 +45,9 @@ public class PacketRegistry {
             case C2S_CREATE_LOBBY:
                 packet = new C2S_CreateLobbyPacket();
                 break;
+            case C2S_LEAVE_LOBBY:
+                packet = new C2S_LeaveLobbyPacket();
+                break;
             default:
                 throw new UnsupportedOperationException("Unimplemented packet type: " + type);
         }
