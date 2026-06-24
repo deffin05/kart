@@ -37,6 +37,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -115,6 +117,15 @@
             <Pane fx:id="logsPane" disable="true" prefHeight="200.0" prefWidth="200.0" visible="false">
                <children>
                   <Label layoutX="399.0" layoutY="25.0" styleClass="title" text="Logs" />
+                           <TableView fx:id="recentGamesTable" layoutX="180.0" layoutY="67.0" prefHeight="347.0" prefWidth="544.0" styleClass="logs-table">
+                              <columns>
+                                 <TableColumn fx:id="logsDateColumn" prefWidth="220.0" text="Date" />
+                                 <TableColumn fx:id="logsWinnerColumn" prefWidth="120.0" text="Winner" />
+                                 <TableColumn fx:id="logsDurationColumn" prefWidth="100.0" text="Duration" />
+                                 <TableColumn fx:id="logsPlayersColumn" prefWidth="100.0" text="Players" />
+                              </columns>
+                           </TableView>
+                           <Label fx:id="logsStatusLabel" layoutX="188.0" layoutY="422.0" prefHeight="20.0" prefWidth="535.0" />
                   <Button fx:id="logsBackBtn" layoutX="401.0" layoutY="452.0" mnemonicParsing="false" onAction="#onLogsBackBtnClick" text="Back" />
                </children>
             </Pane>

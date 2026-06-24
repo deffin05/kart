@@ -1,9 +1,10 @@
 package com.kartgame.server.database;
 
 import java.sql.*;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.time.format.DateTimeParseException;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 public class DatabaseManager {
     private static final String DB_URL = "jdbc:sqlite:game.db";
+    private static final DateTimeFormatter LOG_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private ExecutorService dbExecutor;
 
@@ -123,24 +125,34 @@ public class DatabaseManager {
     }
 
     public void insertBattleLog(int winner_id, long time, List<Integer> players) {
+        if (winner_id <= 0) {
+            System.err.println("Skipping battle log insert: invalid winner_id=" + winner_id);
+            return;
+        }
+
         String queryBattleLog = "INSERT INTO BattleLog (winner_id, battle_date, duration_milis) VALUES (?, ?, ?)";
         Integer log_id = null;
 
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(queryBattleLog)) {
+             PreparedStatement pstmt = conn.prepareStatement(queryBattleLog, Statement.RETURN_GENERATED_KEYS)) {
 
             LocalDateTime now = LocalDateTime.now();
             pstmt.setInt(1, winner_id);
-            pstmt.setObject(2, now);
+            pstmt.setString(2, now.format(LOG_DATE_FORMAT));
             pstmt.setLong(3, time);
 
-            log_id = pstmt.executeUpdate();
+            pstmt.executeUpdate();
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    log_id = generatedKeys.getInt(1);
+                }
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        if (log_id == null) return;;
+        if (log_id == null) return;
         String queryLogUser = "INSERT INTO LogUser (player_id, log_id) VALUES (?, ?)";
 
         try (Connection conn = getConnection();
@@ -148,6 +160,7 @@ public class DatabaseManager {
 
             for (int playerId : players) {
                 pstmt.setInt(1, playerId);
+                pstmt.setInt(2, log_id);
                 pstmt.executeUpdate();
             }
         } catch (SQLException e) {
@@ -156,13 +169,62 @@ public class DatabaseManager {
 
     }
 
+    public List<RecentGameLog> getRecentBattleLogs(int limit) {
+        String query = """
+              SELECT COALESCE(u.username, 'Unknown') AS winner_username,
+                       bl.battle_date AS battle_date,
+                       bl.duration_milis AS duration_milis,
+                       COUNT(lu.player_id) AS players_count
+                FROM BattleLog bl
+              LEFT JOIN Users u ON u.id = bl.winner_id
+                LEFT JOIN LogUser lu ON lu.log_id = bl.id
+              GROUP BY bl.id, winner_username, bl.battle_date, bl.duration_milis
+                ORDER BY bl.battle_date DESC
+                LIMIT ?
+                """;
+
+        List<RecentGameLog> logs = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, limit);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    String winnerUsername = rs.getString("winner_username");
+                    String battleDate = normalizeBattleDate(rs.getString("battle_date"));
+
+                    long durationMillis = rs.getLong("duration_milis");
+                    int playersCount = rs.getInt("players_count");
+                    logs.add(new RecentGameLog(winnerUsername, battleDate, durationMillis, playersCount));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return logs;
+    }
+
+    private String normalizeBattleDate(String rawDate) {
+        if (rawDate == null || rawDate.isBlank()) {
+            return "";
+        }
+
+        String normalized = rawDate.trim().replace(' ', 'T');
+        try {
+            LocalDateTime dt = LocalDateTime.parse(normalized);
+            return dt.format(LOG_DATE_FORMAT);
+        } catch (DateTimeParseException ignored) {
+            return rawDate;
+        }
+    }
+
     public int getUserId(String username) {
         String query = "SELECT id FROM Users WHERE username = ?";
 
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            pstmt.setString(1, username);
+            pstmt.setString(1, username == null ? null : username.trim());
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -173,5 +235,35 @@ public class DatabaseManager {
             System.err.println("Invalid user requested");
         }
         return -1;
+    }
+
+    public static class RecentGameLog {
+        private final String winnerUsername;
+        private final String battleDate;
+        private final long durationMillis;
+        private final int playersCount;
+
+        public RecentGameLog(String winnerUsername, String battleDate, long durationMillis, int playersCount) {
+            this.winnerUsername = winnerUsername;
+            this.battleDate = battleDate;
+            this.durationMillis = durationMillis;
+            this.playersCount = playersCount;
+        }
+
+        public String getWinnerUsername() {
+            return winnerUsername;
+        }
+
+        public String getBattleDate() {
+            return battleDate;
+        }
+
+        public long getDurationMillis() {
+            return durationMillis;
+        }
+
+        public int getPlayersCount() {
+            return playersCount;
+        }
     }
 }

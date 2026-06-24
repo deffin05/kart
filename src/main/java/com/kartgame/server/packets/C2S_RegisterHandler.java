@@ -21,7 +21,7 @@ public class C2S_RegisterHandler implements PacketHandler<C2S_RegisterPacket>{
 
     @Override
     public void handle(C2S_RegisterPacket packet, TCPClientHandler client) {
-        String username = packet.getUsername();
+        String username = packet.getUsername() == null ? "" : packet.getUsername().trim();
         String password = packet.getPassword();
 
         db.execute(() -> {
@@ -41,7 +41,8 @@ public class C2S_RegisterHandler implements PacketHandler<C2S_RegisterPacket>{
                 int dbId = db.getUserId(username);
                 if (dbId == -1) {
                     System.err.println("Invalid user id after login");
-                    System.err.println("Should never happen ¯\\_(ツ)_/¯");
+                    client.sendPacket(new S2C_LoginResponse(-1, "Internal server error."));
+                    return;
                 }
 
                 Player player = new Player(dbId, username, token, client);

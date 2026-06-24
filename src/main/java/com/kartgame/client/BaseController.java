@@ -1,9 +1,11 @@
 package com.kartgame.client;
 
 import com.kartgame.common.protocol.packets.S2C_GameEnding;
+import com.kartgame.common.protocol.packets.S2C_RecentGamesResponsePacket;
 import com.kartgame.common.protocol.packets.S2C_WorldState;
 import com.kartgame.server.game.Collectible;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -13,6 +15,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -89,6 +93,13 @@ public class BaseController implements Initializable {
     @FXML private Label hp3Label;
     @FXML private Label hp4Label;
     @FXML private Label winnerLabel;
+    @FXML private Label logsStatusLabel;
+
+    @FXML private TableView<RecentGameRow> recentGamesTable;
+    @FXML private TableColumn<RecentGameRow, String> logsDateColumn;
+    @FXML private TableColumn<RecentGameRow, String> logsWinnerColumn;
+    @FXML private TableColumn<RecentGameRow, String> logsDurationColumn;
+    @FXML private TableColumn<RecentGameRow, String> logsPlayersColumn;
 
     @FXML private Group car1;
     @FXML private Group car2;
@@ -119,6 +130,7 @@ public class BaseController implements Initializable {
         this.client.setLobbyInfoListener(this::handleLobbyInfo);
         this.client.setGameStartedListener(packet -> handleGameStarted());
         this.client.setGameEndingListener(this::handleGameEnding);
+        this.client.setRecentGamesListener(this::handleRecentGames);
     }
 
     public void attachScene(Scene scene) {
@@ -170,6 +182,12 @@ public class BaseController implements Initializable {
         loginStatusLabel.setText("");
         signInStatusLabel.setText("");
         joinLobbyStatusLabel.setText("");
+        logsStatusLabel.setText("");
+
+        logsDateColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getBattleDate()));
+        logsWinnerColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getWinnerUsername()));
+        logsDurationColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getDuration()));
+        logsPlayersColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getPlayersCount()));
 
         carGroups[0] = car1;
         carGroups[1] = car2;
@@ -365,6 +383,8 @@ public class BaseController implements Initializable {
         mainMenuBox.setDisable(true);
         logsPane.setVisible(true);
         logsPane.setDisable(false);
+
+        requestRecentGames();
     }
 
     @FXML
@@ -465,6 +485,43 @@ public class BaseController implements Initializable {
             gameOver.setVisible(true);
             gameOver.setDisable(false);
         });
+    }
+
+    private void requestRecentGames() {
+        if (client == null) {
+            logsStatusLabel.setText("Client connection is not ready.");
+            return;
+        }
+
+        logsStatusLabel.setText("Loading recent games...");
+        try {
+            client.sendRecentGamesRequest();
+        } catch (IOException ex) {
+            logsStatusLabel.setText("Failed to load logs: " + ex.getMessage());
+        }
+    }
+
+    private void handleRecentGames(S2C_RecentGamesResponsePacket packet) {
+        Platform.runLater(() -> {
+            recentGamesTable.getItems().clear();
+            for (S2C_RecentGamesResponsePacket.GameLogEntry entry : packet.getEntries()) {
+                recentGamesTable.getItems().add(new RecentGameRow(
+                        entry.getBattleDate(),
+                        entry.getWinnerUsername(),
+                        formatDuration(entry.getDurationMillis()),
+                        Integer.toString(entry.getPlayersCount())
+                ));
+            }
+
+            logsStatusLabel.setText(packet.getEntries().isEmpty() ? "No games found." : "Loaded " + packet.getEntries().size() + " games.");
+        });
+    }
+
+    private String formatDuration(long durationMillis) {
+        long totalSeconds = durationMillis / 1000;
+        long minutes = totalSeconds / 60;
+        long seconds = totalSeconds % 60;
+        return String.format("%02d:%02d", minutes, seconds);
     }
 
     private void handleWorldState(S2C_WorldState state) {
@@ -633,5 +690,35 @@ public class BaseController implements Initializable {
         menuPane.setDisable(false);
         mainMenuBox.setVisible(true);
         mainMenuBox.setDisable(false);
+    }
+
+    public static class RecentGameRow {
+        private final String battleDate;
+        private final String winnerUsername;
+        private final String duration;
+        private final String playersCount;
+
+        public RecentGameRow(String battleDate, String winnerUsername, String duration, String playersCount) {
+            this.battleDate = battleDate;
+            this.winnerUsername = winnerUsername;
+            this.duration = duration;
+            this.playersCount = playersCount;
+        }
+
+        public String getBattleDate() {
+            return battleDate;
+        }
+
+        public String getWinnerUsername() {
+            return winnerUsername;
+        }
+
+        public String getDuration() {
+            return duration;
+        }
+
+        public String getPlayersCount() {
+            return playersCount;
+        }
     }
 }
