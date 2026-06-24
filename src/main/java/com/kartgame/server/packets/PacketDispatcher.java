@@ -14,6 +14,7 @@ public class PacketDispatcher {
     public PacketDispatcher(DatabaseManager db, LobbyManager lobbyManager) {
         handlers.put(PacketType.C2S_LOGIN, new C2S_LoginHandler(db, lobbyManager));
         handlers.put(PacketType.C2S_REGISTER, new C2S_RegisterHandler(db, lobbyManager));
+        handlers.put(PacketType.C2S_CREATE_LOBBY, new CreateLobbyHandler(lobbyManager));
         handlers.put(PacketType.C2S_JOIN_LOBBY, new JoinLobbyHandler(lobbyManager));
     }
 
@@ -27,7 +28,7 @@ public class PacketDispatcher {
             return;
         }
 
-        if (type != PacketType.C2S_LOGIN && !client.isAuthenticated()) {
+        if (type != PacketType.C2S_LOGIN && type != PacketType.C2S_REGISTER && !client.isAuthenticated()) {
             System.err.println("Security alert: Unauthenticated user attempted: " + type + ", user: " + client.getSocket());
             client.close();
             return;

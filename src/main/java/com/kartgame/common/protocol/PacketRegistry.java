@@ -42,6 +42,9 @@ public class PacketRegistry {
             case C2S_JOIN_LOBBY:
                 packet = new C2S_JoinLobbyPacket();
                 break;
+            case C2S_CREATE_LOBBY:
+                packet = new C2S_CreateLobbyPacket();
+                break;
             default:
                 throw new UnsupportedOperationException("Unimplemented packet type: " + type);
         }
