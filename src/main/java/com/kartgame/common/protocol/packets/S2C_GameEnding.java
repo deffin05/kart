@@ -6,9 +6,15 @@ import com.kartgame.common.protocol.PacketType;
 import java.nio.ByteBuffer;
 
 public class S2C_GameEnding extends Packet {
+    private String winnerUsername;
+
+    public S2C_GameEnding(String winnerUsername) {
+        super(PacketType.S2C_GAME_END);
+        this.winnerUsername = winnerUsername;
+    }
+
     public S2C_GameEnding() {
         super(PacketType.S2C_GAME_END);
-        // TODO: finish this
     }
 
     @Override

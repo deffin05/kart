@@ -4,14 +4,16 @@ public class KartState {
     private int playerToken;
     private float x;
     private float y;
+    private final BoundingBox boundingBox;
     private int hp = 100;
     private float angle = 0.0f;
     private float speed = 0.0f;
 
-    public KartState(int playerToken, float x, float y) {
+    public KartState(int playerToken, float x, float y, BoundingBox boundingBox) {
         this.playerToken = playerToken;
         this.x = x;
         this.y = y;
+        this.boundingBox = boundingBox;
     }
 
     public int getPlayerToken() {
@@ -56,5 +58,36 @@ public class KartState {
 
     public void setAngle(float angle) {
         this.angle = angle;
+    }
+
+    public static class BoundingBox {
+        private final float top = 680f;
+        private final float bottom = 40f;
+        private final float right;
+        private final float left;
+        public BoundingBox(float left, float right) {
+            this.right = right;
+            this.left = left;
+        }
+
+        public float getTop() {
+            return top;
+        }
+
+        public float getBottom() {
+            return bottom;
+        }
+
+        public float getRight() {
+            return right;
+        }
+
+        public float getLeft() {
+            return left;
+        }
+    }
+
+    public BoundingBox getBoundingBox() {
+        return boundingBox;
     }
 }

@@ -2,6 +2,7 @@ package com.kartgame.server.lobby;
 
 import com.kartgame.common.protocol.packets.S2C_GameStartedPacket;
 import com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket;
+import com.kartgame.server.database.DatabaseManager;
 import com.kartgame.server.game.GameSession;
 import com.kartgame.server.network.UDPServer;
 
@@ -19,9 +20,18 @@ public class LobbyManager {
 
     private final SecureRandom random = new SecureRandom();
     private UDPServer udpServer;
+    private DatabaseManager db;
 
     public void setUdpServer(UDPServer udpServer) {
         this.udpServer = udpServer;
+    }
+
+    public DatabaseManager getDb() {
+        return db;
+    }
+
+    public void setDb(DatabaseManager db) {
+        this.db = db;
     }
 
     public void registerPlayer(Player player) {
@@ -112,7 +122,7 @@ public class LobbyManager {
             sessionPlayers.put(p.getToken(), p);
         }
 
-        GameSession session = new GameSession(lobbyId, sessionPlayers, udpServer);
+        GameSession session = new GameSession(lobbyId, sessionPlayers, udpServer, db);
         activeSessions.put(lobbyId, session);
 
         lobby.setGameStarted(true);

@@ -4,12 +4,17 @@ import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.packets.C2S_UserInput;
 import com.kartgame.common.protocol.packets.S2C_GameEnding;
 import com.kartgame.common.protocol.packets.S2C_WorldState;
+import com.kartgame.server.database.DatabaseManager;
 import com.kartgame.server.lobby.Player;
 import com.kartgame.server.network.UDPServer;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledFuture;
@@ -20,13 +25,16 @@ public class GameSession {
     private final Map<Integer, Player> players = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<PlayerInputEvent> incomingInputs = new ConcurrentLinkedQueue<>();
     private final UDPServer udpServer;
+    private final DatabaseManager db;
     private volatile boolean matchActive = true;
+    private final Instant startTime = Instant.now();
 
     private ScheduledFuture<?> gameLoopFuture;
 
-    public GameSession(int lobbyId, Map<Integer, Player> lobbyPlayers, UDPServer udpServer) {
+    public GameSession(int lobbyId, Map<Integer, Player> lobbyPlayers, UDPServer udpServer, DatabaseManager db) {
         this.lobbyId = lobbyId;
         this.udpServer = udpServer;
+        this.db = db;
         this.players.putAll(lobbyPlayers);
 
         int gridSpot = 0;
@@ -34,7 +42,8 @@ public class GameSession {
             // TODO: align with the actual map
             float startX = 160.0f + (gridSpot * 320.0f);
             float startY = 360.0f;
-            kartStates.put(player.getToken(), new KartState(player.getToken(), startX, startY));
+            kartStates.put(player.getToken(), new KartState(player.getToken(), startX, startY,
+                    new KartState.BoundingBox(gridSpot * 320.0f + 40f, (gridSpot + 1) * 320.0f - 40f)));
             gridSpot++;
         }
     }
@@ -51,17 +60,27 @@ public class GameSession {
             }
             simulatePhysics();
             broadcastWorldState();
-            if (checkWinConditions()) {
-//                triggerEndGame();
-            }
+            Optional<Integer> winner = checkWinConditions();
+            winner.ifPresent(this::triggerEndGame);
         } catch (Exception e) {
             System.err.println("Error inside game loop " + lobbyId);
             e.printStackTrace();
         }
     }
 
-    private boolean checkWinConditions() {
-        return false;
+    private Optional<Integer> checkWinConditions() {
+        int alive = 0;
+        KartState alivePlayer = null;
+        for (KartState kart : kartStates.values()) {
+            if (kart.getHp() > 0) {
+                alive++;
+                alivePlayer = kart;
+            }
+        }
+        if (alive <= 1 && alivePlayer != null) {
+            return Optional.of(alivePlayer.getPlayerToken());
+        }
+        return Optional.empty();
     }
 
     private synchronized void triggerEndGame(int winnerToken) {
@@ -75,19 +94,26 @@ public class GameSession {
         Player winner = players.get(winnerToken);
         String winnerUsername = winner.getUsername();
 
-        S2C_GameEnding packet = new S2C_GameEnding();
+        S2C_GameEnding packet = new S2C_GameEnding(winnerUsername);
         for (Player p : players.values()) {
             p.getTcpHandler().sendPacket(packet);
         }
 
-        // TODO save result to the database
+        db.execute(() -> {
+            List<Integer> playerIds = new ArrayList<>(4);
+            for (Player p : players.values()) {
+                playerIds.add(p.getDatabaseId());
+            }
+
+            db.insertBattleLog(winner.getDatabaseId(), Duration.between(startTime, Instant.now()).toMillis(), playerIds);
+        });
     }
 
     private void applyInput(int token, C2S_UserInput input) {
         KartState kart = kartStates.get(token);
         if (kart == null) return;
 
-        if (input.isLeft())  kart.setAngle(kart.getAngle() - 0.05f);
+        if (input.isLeft()) kart.setAngle(kart.getAngle() - 0.05f);
         if (input.isRight()) kart.setAngle(kart.getAngle() + 0.05f);
 
         if (input.isAccelerating()) {
@@ -103,9 +129,29 @@ public class GameSession {
         for (KartState kart : kartStates.values()) {
             float vx = (float) (Math.cos(kart.getAngle()) * kart.getSpeed());
             float vy = (float) (Math.sin(kart.getAngle()) * kart.getSpeed());
+            float nextX = kart.getX() + vx;
+            float nextY = kart.getY() + vy;
 
-            kart.setX(kart.getX() + vx);
-            kart.setY(kart.getY() + vy);
+            float minX = kart.getBoundingBox().getLeft();
+            float maxX = kart.getBoundingBox().getRight();
+
+            if (nextX < minX) {
+                nextX = minX;
+            } else if (nextX > maxX) {
+                nextX = maxX;
+            }
+
+            float minY = kart.getBoundingBox().getBottom();
+            float maxY = kart.getBoundingBox().getTop();
+
+            if (nextY < minY) {
+                nextY = minY;
+            } else if (nextY > maxY) {
+                nextY = maxY;
+            }
+
+            kart.setX(nextX);
+            kart.setY(nextY);
         }
     }
 
