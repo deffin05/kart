@@ -1,8 +1,6 @@
 package com.kartgame.client;
 
-import com.kartgame.client.packets.LoginResponseHandler;
-import com.kartgame.client.packets.LobbyInfoHandler;
-import com.kartgame.client.packets.PacketDispatcher;
+import com.kartgame.client.packets.*;
 import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.PacketRegistry;
 import com.kartgame.common.protocol.PacketType;
@@ -49,6 +47,8 @@ public class TCPClient {
         this.packetDispatcher = new PacketDispatcher();
         this.packetDispatcher.registerHandler(PacketType.S2C_LOGIN_RESPONSE, new LoginResponseHandler());
         this.packetDispatcher.registerHandler(PacketType.S2C_LOBBY_INFO, new LobbyInfoHandler());
+        this.packetDispatcher.registerHandler(PacketType.S2C_GAME_END, new GameEndingHandler());
+        this.packetDispatcher.registerHandler(PacketType.S2C_GAME_STARTED, new GameStartedHandler());
         connect();
     }
 
