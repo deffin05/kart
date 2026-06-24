@@ -6,7 +6,7 @@ import com.kartgame.common.protocol.PacketType;
 import java.nio.ByteBuffer;
 
 public class C2S_LobbyStartPacket extends Packet {
-    protected C2S_LobbyStartPacket() {
+    public C2S_LobbyStartPacket() {
         super(PacketType.C2S_START_LOBBY);
     }
 

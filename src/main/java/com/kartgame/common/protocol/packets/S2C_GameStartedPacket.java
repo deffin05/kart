@@ -6,7 +6,7 @@ import com.kartgame.common.protocol.PacketType;
 import java.nio.ByteBuffer;
 
 public class S2C_GameStartedPacket extends Packet {
-    protected S2C_GameStartedPacket() {
+    public S2C_GameStartedPacket() {
         super(PacketType.S2C_GAME_STARTED);
     }
 
