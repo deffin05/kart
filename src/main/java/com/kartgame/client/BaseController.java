@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
@@ -18,12 +19,28 @@ import java.util.ResourceBundle;
 public class BaseController implements Initializable {
     @FXML private Button lgInBtn;
     @FXML private Button lgInFormBtn;
+    @FXML private Button joinLobbyBtn;
+    @FXML private Button createLobbyBtn;
+    @FXML private Button joinLobbyFormBtn;
+
     @FXML private Pane logInForm;
+    @FXML private Pane joinLobby;
+
     @FXML private VBox mainMenuBox;
+
+    @FXML private StackPane menuPane;
+    @FXML private StackPane lobbyPane;
+
     @FXML private TextField lgnForm;
+    @FXML private TextField lobbyId;
+
     @FXML private PasswordField pswrdForm;
+
     @FXML private Label loginStatusLabel;
     @FXML private Label nicknameLabel;
+    @FXML private Label lobbyIdLabel;
+    @FXML private VBox lobbyPlayersList;
+    @FXML private Label lobbyStatusLabel;
 
     private TCPClient client;
     private String lastLoginUsername;
@@ -31,6 +48,7 @@ public class BaseController implements Initializable {
     public void setClient(TCPClient client) {
         this.client = client;
         this.client.setLoginResponseListener(this::handleLoginResponse);
+        this.client.setLobbyInfoListener(this::handleLobbyInfo);
     }
 
     @Override
@@ -94,6 +112,54 @@ public class BaseController implements Initializable {
             } else {
                 loginStatusLabel.setText(response.getMessage());
             }
+        });
+    }
+
+    @FXML
+    private void onCreateLobbyBtnClick() {
+        // TODO: Handle button click
+        menuPane.setVisible(false);
+        menuPane.setDisable(true);
+        lobbyPane.setVisible(true);
+        lobbyPane.setDisable(false);
+    }
+
+    @FXML
+    private void onJoinLobbyBtnClick() {
+        joinLobby.setVisible(true);
+        joinLobby.setDisable(false);
+        mainMenuBox.setDisable(true);
+        mainMenuBox.setVisible(false);
+    }
+
+    @FXML
+    private void onJoinLobbyFormBtnClick() {
+        // TODO: Handle button click
+        menuPane.setVisible(false);
+        menuPane.setDisable(true);
+        lobbyPane.setVisible(true);
+        lobbyPane.setDisable(false);
+    }
+
+    private void handleLobbyInfo(com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket response) {
+        Platform.runLater(() -> {
+            if (lobbyIdLabel != null) {
+                lobbyIdLabel.setText("Lobby ID: " + response.getLobbyId());
+            }
+            if (lobbyStatusLabel != null) {
+                lobbyStatusLabel.setText("Lobby loaded with " + response.getPlayerUsernames().size() + " players.");
+            }
+            if (lobbyPlayersList != null) {
+                lobbyPlayersList.getChildren().clear();
+                for (String username : response.getPlayerUsernames()) {
+                    Label playerLabel = new Label(username);
+                    lobbyPlayersList.getChildren().add(playerLabel);
+                }
+            }
+            menuPane.setVisible(false);
+            menuPane.setDisable(true);
+            lobbyPane.setVisible(true);
+            lobbyPane.setDisable(false);
         });
     }
 }
