@@ -10,6 +10,7 @@ import com.kartgame.server.network.UDPServer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledFuture;
@@ -52,17 +53,27 @@ public class GameSession {
             }
             simulatePhysics();
             broadcastWorldState();
-            if (checkWinConditions()) {
-//                triggerEndGame();
-            }
+            Optional<Integer> winner = checkWinConditions();
+            winner.ifPresent(this::triggerEndGame);
         } catch (Exception e) {
             System.err.println("Error inside game loop " + lobbyId);
             e.printStackTrace();
         }
     }
 
-    private boolean checkWinConditions() {
-        return false;
+    private Optional<Integer> checkWinConditions() {
+        int alive = 0;
+        KartState alivePlayer = null;
+        for (KartState kart : kartStates.values()) {
+            if (kart.getHp() > 0) {
+                alive++;
+                alivePlayer = kart;
+            }
+        }
+        if (alive <= 1 && alivePlayer != null) {
+            return Optional.of(alivePlayer.getPlayerToken());
+        }
+        return Optional.empty();
     }
 
     private synchronized void triggerEndGame(int winnerToken) {
