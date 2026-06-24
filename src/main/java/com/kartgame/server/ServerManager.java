@@ -2,11 +2,14 @@ package com.kartgame.server;
 
 import com.kartgame.common.security.RSAEngineServer;
 import com.kartgame.server.database.DatabaseManager;
+import com.kartgame.server.lobby.LobbyManager;
 import com.kartgame.server.network.TCPServer;
+import com.kartgame.server.network.UDPServer;
 import com.kartgame.server.packets.PacketDispatcher;
 
 public class ServerManager {
     private TCPServer tcpServer;
+    private UDPServer udpServer;
     private DatabaseManager dbManager;
 
     public static void main(String[] args) {
@@ -25,9 +28,12 @@ public class ServerManager {
             dbManager = new DatabaseManager();
             dbManager.init();
 
-            PacketDispatcher packetDispatcher = new PacketDispatcher(dbManager);
+            LobbyManager lobbyManager = new LobbyManager();
+
+            PacketDispatcher packetDispatcher = new PacketDispatcher(dbManager, lobbyManager);
 
             this.tcpServer = new TCPServer(rsaEngine, packetDispatcher);
+            this.udpServer = new UDPServer(lobbyManager);
             Thread tcpThread = new Thread(tcpServer);
 
             tcpThread.start();
@@ -42,6 +48,7 @@ public class ServerManager {
         System.out.println("Initiating shutdown");
 
         tcpServer.stop();
+        udpServer.stop();
         dbManager.shutdown();
     }
 }
