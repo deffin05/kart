@@ -1,8 +1,13 @@
 package com.kartgame.client;
 
+import com.kartgame.client.packets.LoginResponseHandler;
+import com.kartgame.client.packets.LobbyInfoHandler;
+import com.kartgame.client.packets.PacketDispatcher;
 import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.PacketRegistry;
+import com.kartgame.common.protocol.PacketType;
 import com.kartgame.common.protocol.packets.C2S_LoginPacket;
+import com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket;
 import com.kartgame.common.protocol.packets.S2C_LoginResponse;
 import com.kartgame.common.security.AESEngine;
 import com.kartgame.common.security.RSAEngineClient;
@@ -20,17 +25,22 @@ import java.util.function.Consumer;
 public class TCPClient {
     private final AESEngine aesEngine;
     private final RSAEngineClient rsaEngine;
+    private final PacketDispatcher packetDispatcher;
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
     private Thread readerThread;
     private volatile boolean running = true;
     private Consumer<S2C_LoginResponse> loginResponseListener;
+    private Consumer<S2C_LobbyInfoPacket> lobbyInfoListener;
     private int loginTag = -1;
 
     public TCPClient() throws IOException {
         this.aesEngine = new AESEngine();
         this.rsaEngine = new RSAEngineClient();
+        this.packetDispatcher = new PacketDispatcher();
+        this.packetDispatcher.registerHandler(PacketType.S2C_LOGIN_RESPONSE, new LoginResponseHandler());
+        this.packetDispatcher.registerHandler(PacketType.S2C_LOBBY_INFO, new LobbyInfoHandler());
         connect();
     }
 
@@ -57,6 +67,18 @@ public class TCPClient {
 
     public void setLoginResponseListener(Consumer<S2C_LoginResponse> listener) {
         this.loginResponseListener = listener;
+    }
+
+    public Consumer<S2C_LoginResponse> getLoginResponseListener() {
+        return loginResponseListener;
+    }
+
+    public void setLobbyInfoListener(Consumer<S2C_LobbyInfoPacket> listener) {
+        this.lobbyInfoListener = listener;
+    }
+
+    public Consumer<S2C_LobbyInfoPacket> getLobbyInfoListener() {
+        return lobbyInfoListener;
     }
 
     private void startReader() {
@@ -94,13 +116,8 @@ public class TCPClient {
                     packetBuffer.flip();
 
                     Packet packet = PacketRegistry.parse(packetBuffer);
-                    if (packet instanceof S2C_LoginResponse response) {
-                        if (response.getToken() > 0) {
-                            setLoginTag(response.getToken());
-                        }
-                        if (loginResponseListener != null) {
-                            loginResponseListener.accept(response);
-                        }
+                    if (packet != null) {
+                        packetDispatcher.dispatch(packet, this);
                     }
                 }
             } catch (IOException e) {
@@ -138,7 +155,7 @@ public class TCPClient {
         return loginTag;
     }
 
-    private void setLoginTag(int loginTag) {
+    public void setLoginTag(int loginTag) {
         this.loginTag = loginTag;
     }
 

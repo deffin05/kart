@@ -38,6 +38,9 @@ public class BaseController implements Initializable {
 
     @FXML private Label loginStatusLabel;
     @FXML private Label nicknameLabel;
+    @FXML private Label lobbyIdLabel;
+    @FXML private VBox lobbyPlayersList;
+    @FXML private Label lobbyStatusLabel;
 
     private TCPClient client;
     private String lastLoginUsername;
@@ -45,6 +48,7 @@ public class BaseController implements Initializable {
     public void setClient(TCPClient client) {
         this.client = client;
         this.client.setLoginResponseListener(this::handleLoginResponse);
+        this.client.setLobbyInfoListener(this::handleLobbyInfo);
     }
 
     @Override
@@ -135,5 +139,27 @@ public class BaseController implements Initializable {
         menuPane.setDisable(true);
         lobbyPane.setVisible(true);
         lobbyPane.setDisable(false);
+    }
+
+    private void handleLobbyInfo(com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket response) {
+        Platform.runLater(() -> {
+            if (lobbyIdLabel != null) {
+                lobbyIdLabel.setText("Lobby ID: " + response.getLobbyId());
+            }
+            if (lobbyStatusLabel != null) {
+                lobbyStatusLabel.setText("Lobby loaded with " + response.getPlayerUsernames().size() + " players.");
+            }
+            if (lobbyPlayersList != null) {
+                lobbyPlayersList.getChildren().clear();
+                for (String username : response.getPlayerUsernames()) {
+                    Label playerLabel = new Label(username);
+                    lobbyPlayersList.getChildren().add(playerLabel);
+                }
+            }
+            menuPane.setVisible(false);
+            menuPane.setDisable(true);
+            lobbyPane.setVisible(true);
+            lobbyPane.setDisable(false);
+        });
     }
 }

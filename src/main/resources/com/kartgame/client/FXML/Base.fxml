@@ -92,16 +92,15 @@
       </StackPane>
       <StackPane fx:id="lobbyPane" disable="true" visible="false">
          <children>
-            <VBox prefHeight="400.0" prefWidth="640.0">
+            <VBox prefHeight="400.0" prefWidth="640.0" spacing="10.0" alignment="TOP_CENTER">
               <children>
                   <AnchorPane prefHeight="400.0" prefWidth="640.0">
                      <children>
                         <Button layoutX="300.0" layoutY="346.0" mnemonicParsing="false" text="Start" />
                         <Label layoutX="304.0" layoutY="23.0" text="Lobby" />
-                        <Label layoutX="68.0" layoutY="287.0" text="Nickname1" />
-                        <Label layoutX="205.0" layoutY="287.0" text="Nickname2" />
-                        <Label layoutX="360.0" layoutY="287.0" text="Nickname3" />
-                        <Label layoutX="500.0" layoutY="287.0" text="Nickname4" />
+                        <Label fx:id="lobbyIdLabel" layoutX="40.0" layoutY="70.0" text="Lobby ID:" />
+                        <Label fx:id="lobbyStatusLabel" layoutX="40.0" layoutY="100.0" text="Status" />
+                        <VBox fx:id="lobbyPlayersList" layoutX="40.0" layoutY="140.0" spacing="5.0" prefWidth="560.0" prefHeight="180.0" />
                      </children>
                   </AnchorPane>
               </children>
