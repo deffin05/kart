@@ -3,6 +3,7 @@ package com.kartgame.server.lobby;
 import com.kartgame.common.protocol.packets.S2C_GameStartedPacket;
 import com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket;
 import com.kartgame.server.game.GameSession;
+import com.kartgame.server.network.UDPServer;
 
 import java.security.SecureRandom;
 import java.util.HashMap;
@@ -17,6 +18,11 @@ public class LobbyManager {
     private final ScheduledExecutorService gameLoopScheduler = Executors.newScheduledThreadPool(4);
 
     private final SecureRandom random = new SecureRandom();
+    private UDPServer udpServer;
+
+    public void setUdpServer(UDPServer udpServer) {
+        this.udpServer = udpServer;
+    }
 
     public void registerPlayer(Player player) {
         playerMap.put(player.getToken(), player);
@@ -106,7 +112,7 @@ public class LobbyManager {
             sessionPlayers.put(p.getToken(), p);
         }
 
-        GameSession session = new GameSession(lobbyId, sessionPlayers);
+        GameSession session = new GameSession(lobbyId, sessionPlayers, udpServer);
         activeSessions.put(lobbyId, session);
 
         lobby.setGameStarted(true);

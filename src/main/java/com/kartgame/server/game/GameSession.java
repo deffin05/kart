@@ -2,8 +2,12 @@ package com.kartgame.server.game;
 
 import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.packets.C2S_UserInput;
+import com.kartgame.common.protocol.packets.S2C_WorldState;
 import com.kartgame.server.lobby.Player;
+import com.kartgame.server.network.UDPServer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -14,11 +18,13 @@ public class GameSession {
     private final Map<Integer, KartState> kartStates = new ConcurrentHashMap<>();
     private final Map<Integer, Player> players = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<PlayerInputEvent> incomingInputs = new ConcurrentLinkedQueue<>();
+    private final UDPServer udpServer;
 
     private ScheduledFuture<?> gameLoopFuture;
 
-    public GameSession(int lobbyId, Map<Integer, Player> lobbyPlayers) {
+    public GameSession(int lobbyId, Map<Integer, Player> lobbyPlayers, UDPServer udpServer) {
         this.lobbyId = lobbyId;
+        this.udpServer = udpServer;
         this.players.putAll(lobbyPlayers);
 
         int gridSpot = 0;
@@ -57,9 +63,9 @@ public class GameSession {
         if (input.isRight()) kart.setAngle(kart.getAngle() + 0.05f);
 
         if (input.isAccelerating()) {
-            kart.setSpeed(Math.min(kart.getSpeed() + 0.2f, 8.0f));
+            kart.setSpeed(Math.min(kart.getSpeed() + 1.0f, 80.0f));
         } else if (input.isSlowing()) {
-            kart.setSpeed(Math.max(kart.getSpeed() - 0.4f, -2.0f));
+            kart.setSpeed(Math.max(kart.getSpeed() - 2.0f, -20.0f));
         } else {
             kart.setSpeed(kart.getSpeed() * 0.95f);
         }
@@ -76,13 +82,25 @@ public class GameSession {
     }
 
     private void broadcastWorldState() {
-        // TODO
-        // S2C_WorldStatePacket packet = new S2C_WorldStatePacket(kartStates.values());
-        // broadcastUdp(packet);
+        List<S2C_WorldState.KartData> karts = new ArrayList<>();
+        for (KartState state : kartStates.values()) {
+            karts.add(new S2C_WorldState.KartData(
+                    state.getPlayerToken(),
+                    state.getX(),
+                    state.getY(),
+                    state.getAngle(),
+                    state.getHp()
+            ));
+        }
+
+        S2C_WorldState worldState = new S2C_WorldState(karts);
+        broadcastUdp(worldState);
     }
 
     public void broadcastUdp(Packet packet) {
-        // TODO
+        for (Player player : players.values()) {
+            udpServer.sendUdpPacket(packet, player);
+        }
     }
 
     public void setGameLoopFuture(ScheduledFuture<?> future) {

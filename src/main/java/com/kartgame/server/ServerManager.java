@@ -35,9 +35,13 @@ public class ServerManager {
 
             this.tcpServer = new TCPServer(rsaEngine, packetDispatcher);
             this.udpServer = new UDPServer(lobbyManager);
+
+            lobbyManager.setUdpServer(udpServer);
             Thread tcpThread = new Thread(tcpServer);
+            Thread udpThread = new Thread(udpServer);
 
             tcpThread.start();
+            udpThread.start();
         } catch (Exception e) {
             System.err.println("Server failed to start.");
             e.printStackTrace();
