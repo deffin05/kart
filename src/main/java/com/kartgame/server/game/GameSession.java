@@ -2,6 +2,7 @@ package com.kartgame.server.game;
 
 import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.packets.C2S_UserInput;
+import com.kartgame.common.protocol.packets.S2C_GameEnding;
 import com.kartgame.common.protocol.packets.S2C_WorldState;
 import com.kartgame.server.lobby.Player;
 import com.kartgame.server.network.UDPServer;
@@ -19,6 +20,7 @@ public class GameSession {
     private final Map<Integer, Player> players = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<PlayerInputEvent> incomingInputs = new ConcurrentLinkedQueue<>();
     private final UDPServer udpServer;
+    private volatile boolean matchActive = true;
 
     private ScheduledFuture<?> gameLoopFuture;
 
@@ -49,10 +51,36 @@ public class GameSession {
             }
             simulatePhysics();
             broadcastWorldState();
+            if (checkWinConditions()) {
+//                triggerEndGame();
+            }
         } catch (Exception e) {
             System.err.println("Error inside game loop " + lobbyId);
             e.printStackTrace();
         }
+    }
+
+    private boolean checkWinConditions() {
+        return false;
+    }
+
+    private synchronized void triggerEndGame(int winnerToken) {
+        if (!matchActive) return;
+        this.matchActive = false;
+
+        if (gameLoopFuture != null) {
+            gameLoopFuture.cancel(false);
+        }
+
+        Player winner = players.get(winnerToken);
+        String winnerUsername = winner.getUsername();
+
+        S2C_GameEnding packet = new S2C_GameEnding();
+        for (Player p : players.values()) {
+            p.getTcpHandler().sendPacket(packet);
+        }
+
+        // TODO save result to the database
     }
 
     private void applyInput(int token, C2S_UserInput input) {

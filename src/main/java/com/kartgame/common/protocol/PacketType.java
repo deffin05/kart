@@ -10,6 +10,7 @@ public enum PacketType {
     C2S_JOIN_LOBBY(5),
     C2S_START_LOBBY(6),
     S2C_GAME_STARTED(7),
+    S2C_GAME_END(8),
 
     // UDP
     C2S_USER_INPUT(41),

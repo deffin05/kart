@@ -33,7 +33,8 @@ public class PacketRegistry {
             case C2S_START_LOBBY -> new C2S_LobbyStartPacket();
             case S2C_GAME_STARTED -> new S2C_GameStartedPacket();
             case C2S_USER_INPUT -> new C2S_UserInput();
-//            case S2C_WORLD_STATE -> new S2C_WorldState();
+            case S2C_WORLD_STATE -> new S2C_WorldState();
+            case S2C_GAME_END -> new S2C_GameEnding();
             default -> throw new UnsupportedOperationException("Unimplemented packet type: " + type);
         };
 
