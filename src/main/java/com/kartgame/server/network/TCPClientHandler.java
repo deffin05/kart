@@ -158,4 +158,8 @@ public class TCPClientHandler implements Runnable {
     public void setPlayerToken(int playerToken) {
         this.playerToken = playerToken;
     }
+
+    public AESEngine getAesEngine() {
+        return aesEngine;
+    }
 }

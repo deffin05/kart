@@ -2,10 +2,15 @@ package com.kartgame.server.lobby;
 
 import com.kartgame.server.network.TCPClientHandler;
 
+import java.net.InetAddress;
+
 public class Player {
     private final int databaseId;
     private final String username;
     private final int token;
+
+    private InetAddress udpAddress = null;
+    private int udpPort;
 
     private final TCPClientHandler tcpHandler;
 
@@ -40,5 +45,25 @@ public class Player {
 
     public void setCurrentLobbyId(Integer currentLobbyId) {
         this.currentLobbyId = currentLobbyId;
+    }
+
+    public InetAddress getUdpAddress() {
+        return udpAddress;
+    }
+
+    public int getUdpPort() {
+        return udpPort;
+    }
+
+    public void setUdpAddress(InetAddress udpAddress) {
+        this.udpAddress = udpAddress;
+    }
+
+    public void setUdpPort(int udpPort) {
+        this.udpPort = udpPort;
+    }
+
+    public boolean isUdpBound() {
+        return udpAddress != null;
     }
 }
