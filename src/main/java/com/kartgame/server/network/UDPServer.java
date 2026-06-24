@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class UDPServer implements Runnable {
@@ -23,6 +24,7 @@ public class UDPServer implements Runnable {
     private final DatagramSocket socket;
     private final LobbyManager lobbyManager;
     private final ExecutorService udpThreadPool;
+    private final ScheduledExecutorService keepAliveScheduler = Executors.newSingleThreadScheduledExecutor();
 
     private boolean running = true;
 
@@ -109,10 +111,49 @@ public class UDPServer implements Runnable {
         }
     }
 
+    public void startUdpKeepAliveLoop() {
+        keepAliveScheduler.scheduleAtFixedRate(() -> {
+            try {
+                for (Player player : lobbyManager.getPlayerMap().values()) {
+                    if (player.isUdpBound()) {
+                        sendUdpKeepAlive(player);
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error in UDP Keep-Alive loop: " + e.getMessage());
+            }
+        }, 30, 30, TimeUnit.SECONDS);
+    }
+
+    private void sendUdpKeepAlive(Player player) {
+        try {
+            ByteBuffer buffer = ByteBuffer.allocate(Packet.HEADER_SIZE);
+            buffer.put(Packet.MAGIC_BYTE);
+            buffer.put(PacketType.PING.getId());
+            buffer.putInt(player.getToken());
+            buffer.putShort((short) 0);
+            buffer.flip();
+
+            byte[] data = buffer.array();
+            DatagramPacket packet = new DatagramPacket(
+                    data,
+                    data.length,
+                    player.getUdpAddress(),
+                    player.getUdpPort()
+            );
+
+            socket.send(packet);
+
+        } catch (IOException e) {
+            System.err.println("Failed to send UDP Keep-Alive to " + player.getUsername());
+        }
+    }
+
     public void stop() {
         this.running = false;
         socket.close();
 
+        keepAliveScheduler.shutdown();
         udpThreadPool.shutdown();
         try {
             if (!udpThreadPool.awaitTermination(2, TimeUnit.SECONDS)) {
