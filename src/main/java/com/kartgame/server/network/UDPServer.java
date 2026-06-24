@@ -2,6 +2,7 @@ package com.kartgame.server.network;
 
 import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.PacketRegistry;
+import com.kartgame.common.protocol.PacketType;
 import com.kartgame.server.lobby.LobbyManager;
 import com.kartgame.server.lobby.Player;
 
@@ -75,12 +76,12 @@ public class UDPServer implements Runnable {
             if (!player.isUdpBound()) {
                 player.setUdpAddress(senderIp);
                 player.setUdpPort(senderPort);
-            } else {
-                if (!player.getUdpAddress().equals(senderIp) || player.getUdpPort() != senderPort) {
-                    System.err.println("UDP from the wrong address received.");
-                    return;
-                }
+            } else if (!player.getUdpAddress().equals(senderIp) || player.getUdpPort() != senderPort) {
+                System.err.println("UDP from the wrong address received.");
+                return;
             }
+
+            if (typeId == PacketType.PING.getId()) return;
 
             byte[] encryptedPayload = new byte[payloadLength];
             buffer.get(encryptedPayload);

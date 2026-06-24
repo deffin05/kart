@@ -2,6 +2,7 @@ package com.kartgame.server.network;
 
 import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.PacketRegistry;
+import com.kartgame.common.protocol.PacketType;
 import com.kartgame.common.security.AESEngine;
 import com.kartgame.common.security.RSAEngineServer;
 import com.kartgame.server.packets.PacketDispatcher;
@@ -50,6 +51,10 @@ public class TCPClientHandler implements Runnable {
                 byte typeId = headerBuffer.get();
                 int playerToken = headerBuffer.getInt();
                 short payloadLength = headerBuffer.getShort();
+
+                if (typeId == PacketType.PING.getId()) {
+                    continue;
+                }
 
                 if (magic != Packet.MAGIC_BYTE) {
                     throw new SecurityException("Invalid Magic Byte.");
