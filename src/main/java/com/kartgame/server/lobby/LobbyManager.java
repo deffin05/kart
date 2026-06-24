@@ -147,4 +147,8 @@ public class LobbyManager {
             gameLoopScheduler.shutdownNow();
         }
     }
+
+    public ConcurrentHashMap<Integer, GameSession> getActiveSessions() {
+        return activeSessions;
+    }
 }

@@ -3,6 +3,8 @@ package com.kartgame.server.network;
 import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.PacketRegistry;
 import com.kartgame.common.protocol.PacketType;
+import com.kartgame.common.protocol.packets.C2S_UserInput;
+import com.kartgame.server.game.GameSession;
 import com.kartgame.server.lobby.LobbyManager;
 import com.kartgame.server.lobby.Player;
 
@@ -112,6 +114,18 @@ public class UDPServer implements Runnable {
         }
     }
 
+    private void routePacketToMatch(Player player, Packet packet) {
+        Integer lobbyId = player.getCurrentLobbyId();
+        if (lobbyId == null) return;
+
+        GameSession session = lobbyManager.getActiveSessions().get(lobbyId);
+        if (session == null) return;;
+
+        if (packet instanceof C2S_UserInput inputPacket) {
+            session.queueInput(player.getToken(), inputPacket);
+        }
+    }
+
     public void startUdpKeepAliveLoop() {
         keepAliveScheduler.scheduleAtFixedRate(() -> {
             try {
@@ -179,4 +193,6 @@ public class UDPServer implements Runnable {
             udpThreadPool.shutdownNow();
         }
     }
+
+
 }
