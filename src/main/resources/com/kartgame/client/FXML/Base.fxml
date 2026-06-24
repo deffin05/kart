@@ -59,7 +59,7 @@
                                     <Button fx:id="createLobbyBtn" layoutX="36.0" layoutY="124.0" mnemonicParsing="false" onAction="#onCreateLobbyBtnClick" text="Create Lobby" />
                                     <Label layoutX="40.0" layoutY="52.0" text="Kart" />
                                     <Button fx:id="joinLobbyBtn" layoutX="36.0" layoutY="162.0" mnemonicParsing="false" onAction="#onJoinLobbyBtnClick" prefHeight="26.0" prefWidth="86.0" text="Join Lobby" />
-                                    <Button layoutX="36.0" layoutY="199.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="86.0" text="Sign in" />
+                                    <Button fx:id="signInBtn" layoutX="36.0" layoutY="199.0" mnemonicParsing="false" onAction="#onSignInBtnClick" prefHeight="26.0" prefWidth="86.0" text="Sign in" />
                                     <Button fx:id="lgInBtn" layoutX="36.0" layoutY="239.0" mnemonicParsing="false" onAction="#onLgInBtnClick" prefHeight="26.0" prefWidth="86.0" text="Log In" />
                                     <Label fx:id="nicknameLabel" layoutX="22.0" layoutY="367.0" text="Nickname" />
                                  </children>
@@ -81,11 +81,22 @@
                   <Label fx:id="loginStatusLabel" layoutX="208.0" layoutY="270.0" text="" />
                </children>
             </Pane>
+            <Pane fx:id="signInForm" disable="true" prefHeight="400.0" prefWidth="554.0" visible="false">
+               <children>
+                  <Button fx:id="signInFormBtn" layoutX="283.0" layoutY="239.0" mnemonicParsing="false" onAction="#onSignInFormBtnClick" text="Sign in" />
+                  <PasswordField fx:id="signInPswrdForm" layoutX="283.0" layoutY="186.0" />
+                  <TextField fx:id="signInLgnForm" layoutX="283.0" layoutY="136.0" />
+                  <Label layoutX="208.0" layoutY="190.0" text="Password" />
+                  <Label layoutX="208.0" layoutY="140.0" text="Login" />
+                  <Label fx:id="signInStatusLabel" layoutX="208.0" layoutY="270.0" text="" />
+               </children>
+            </Pane>
             <Pane fx:id="joinLobby" disable="true" prefHeight="400.0" prefWidth="554.0" visible="false">
                <children>
                   <Button fx:id="joinLobbyFormBtn" layoutX="284.0" layoutY="216.0" mnemonicParsing="false" onAction="#onJoinLobbyFormBtnClick" text="Join Lobby" />
                   <TextField fx:id="lobbyId" layoutX="282.0" layoutY="159.0" />
                   <Label layoutX="209.0" layoutY="163.0" text="Lobby ID" />
+                  <Label fx:id="joinLobbyStatusLabel" layoutX="209.0" layoutY="256.0" text="" />
                </children>
             </Pane>
          </children>

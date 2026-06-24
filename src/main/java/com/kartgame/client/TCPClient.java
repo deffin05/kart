@@ -6,7 +6,10 @@ import com.kartgame.client.packets.PacketDispatcher;
 import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.PacketRegistry;
 import com.kartgame.common.protocol.PacketType;
+import com.kartgame.common.protocol.packets.C2S_CreateLobbyPacket;
+import com.kartgame.common.protocol.packets.C2S_JoinLobbyPacket;
 import com.kartgame.common.protocol.packets.C2S_LoginPacket;
+import com.kartgame.common.protocol.packets.C2S_RegisterPacket;
 import com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket;
 import com.kartgame.common.protocol.packets.S2C_LoginResponse;
 import com.kartgame.common.security.AESEngine;
@@ -135,6 +138,29 @@ public class TCPClient {
 
     public void sendLogin(String username, String password) throws IOException {
         C2S_LoginPacket packet = new C2S_LoginPacket(username, password);
+        sendPacket(packet);
+    }
+
+    public void sendRegister(String username, String password) throws IOException {
+        C2S_RegisterPacket packet = new C2S_RegisterPacket(username, password);
+        sendPacket(packet);
+    }
+
+    public void sendCreateLobby() throws IOException {
+        C2S_CreateLobbyPacket packet = new C2S_CreateLobbyPacket();
+        sendPacket(packet);
+    }
+
+    public void sendJoinLobby(int lobbyId) throws IOException {
+        C2S_JoinLobbyPacket packet = new C2S_JoinLobbyPacket(lobbyId);
+        sendPacket(packet);
+    }
+
+    private void sendPacket(Packet packet) throws IOException {
+        if (loginTag > 0) {
+            packet.setPlayerToken(loginTag);
+        }
+
         byte[] payload = packet.serializePayload();
         byte[] encryptedPayload = aesEngine.encrypt(payload);
         byte[] packetBytes = packet.serialize(encryptedPayload);

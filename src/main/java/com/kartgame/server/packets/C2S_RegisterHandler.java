@@ -1,11 +1,8 @@
 package com.kartgame.server.packets;
 
-import com.kartgame.common.protocol.packets.C2S_LoginPacket;
 import com.kartgame.common.protocol.packets.C2S_RegisterPacket;
-import com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket;
 import com.kartgame.common.protocol.packets.S2C_LoginResponse;
 import com.kartgame.server.database.DatabaseManager;
-import com.kartgame.server.lobby.Lobby;
 import com.kartgame.server.lobby.LobbyManager;
 import com.kartgame.server.lobby.Player;
 import com.kartgame.server.network.TCPClientHandler;
@@ -49,10 +46,6 @@ public class C2S_RegisterHandler implements PacketHandler<C2S_RegisterPacket>{
 
                 Player player = new Player(dbId, username, token, client);
                 lobbyManager.registerPlayer(player);
-
-                Lobby newLobby = lobbyManager.createLobby(player);
-
-                client.sendPacket(new S2C_LobbyInfoPacket(newLobby.getId(), newLobby.getLobbyUsernames()));
             } catch (Exception e) {
                 System.err.println("Error processing registration for " + username);
                 e.printStackTrace();
