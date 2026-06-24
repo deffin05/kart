@@ -4,9 +4,13 @@ import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.packets.C2S_UserInput;
 import com.kartgame.common.protocol.packets.S2C_GameEnding;
 import com.kartgame.common.protocol.packets.S2C_WorldState;
+import com.kartgame.server.database.DatabaseManager;
 import com.kartgame.server.lobby.Player;
 import com.kartgame.server.network.UDPServer;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,13 +25,16 @@ public class GameSession {
     private final Map<Integer, Player> players = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<PlayerInputEvent> incomingInputs = new ConcurrentLinkedQueue<>();
     private final UDPServer udpServer;
+    private final DatabaseManager db;
     private volatile boolean matchActive = true;
+    private final Instant startTime = Instant.now();
 
     private ScheduledFuture<?> gameLoopFuture;
 
-    public GameSession(int lobbyId, Map<Integer, Player> lobbyPlayers, UDPServer udpServer) {
+    public GameSession(int lobbyId, Map<Integer, Player> lobbyPlayers, UDPServer udpServer, DatabaseManager db) {
         this.lobbyId = lobbyId;
         this.udpServer = udpServer;
+        this.db = db;
         this.players.putAll(lobbyPlayers);
 
         int gridSpot = 0;
@@ -87,12 +94,19 @@ public class GameSession {
         Player winner = players.get(winnerToken);
         String winnerUsername = winner.getUsername();
 
-        S2C_GameEnding packet = new S2C_GameEnding();
+        S2C_GameEnding packet = new S2C_GameEnding(winnerUsername);
         for (Player p : players.values()) {
             p.getTcpHandler().sendPacket(packet);
         }
 
-        // TODO save result to the database
+        db.execute(() -> {
+            List<Integer> playerIds = new ArrayList<>(4);
+            for (Player p : players.values()) {
+                playerIds.add(p.getDatabaseId());
+            }
+
+            db.insertBattleLog(winner.getDatabaseId(), Duration.between(startTime, Instant.now()).toMillis(), playerIds);
+        });
     }
 
     private void applyInput(int token, C2S_UserInput input) {
