@@ -126,7 +126,8 @@ public class UDPServer implements Runnable {
         }, 30, 30, TimeUnit.SECONDS);
     }
 
-    private void sendUdpPacket(Packet packet, Player player) {
+    public void sendUdpPacket(Packet packet, Player player) {
+        if (!player.isUdpBound()) return;
         packet.setPlayerToken(player.getToken());
         byte[] payloadBytes = packet.serializePayload();
 
@@ -137,6 +138,7 @@ public class UDPServer implements Runnable {
     }
 
     private void sendUdpPacket(byte[] data, Player player) {
+        if (!player.isUdpBound()) return;
         try {
             DatagramPacket packet = new DatagramPacket(
                     data,

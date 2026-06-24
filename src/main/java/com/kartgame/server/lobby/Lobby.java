@@ -71,4 +71,8 @@ public class Lobby {
     public int getId() {
         return id;
     }
+
+    public CopyOnWriteArrayList<Player> getPlayers() {
+        return players;
+    }
 }
