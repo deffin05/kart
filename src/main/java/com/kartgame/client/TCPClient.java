@@ -3,16 +3,22 @@ package com.kartgame.client;
 import com.kartgame.client.packets.LoginResponseHandler;
 import com.kartgame.client.packets.LobbyInfoHandler;
 import com.kartgame.client.packets.PacketDispatcher;
+import com.kartgame.client.packets.GameEndingHandler;
+import com.kartgame.client.packets.GameStartedPacketHandler;
 import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.PacketRegistry;
 import com.kartgame.common.protocol.PacketType;
 import com.kartgame.common.protocol.packets.C2S_CreateLobbyPacket;
 import com.kartgame.common.protocol.packets.C2S_JoinLobbyPacket;
 import com.kartgame.common.protocol.packets.C2S_LeaveLobbyPacket;
+import com.kartgame.common.protocol.packets.C2S_LobbyStartPacket;
 import com.kartgame.common.protocol.packets.C2S_LoginPacket;
 import com.kartgame.common.protocol.packets.C2S_RegisterPacket;
+import com.kartgame.common.protocol.packets.S2C_GameEnding;
+import com.kartgame.common.protocol.packets.S2C_GameStartedPacket;
 import com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket;
 import com.kartgame.common.protocol.packets.S2C_LoginResponse;
+import com.kartgame.common.protocol.packets.S2C_WorldState;
 import com.kartgame.common.security.AESEngine;
 import com.kartgame.common.security.RSAEngineClient;
 import com.kartgame.server.network.TCPServer;
@@ -41,6 +47,9 @@ public class TCPClient {
     private volatile boolean running = true;
     private Consumer<S2C_LoginResponse> loginResponseListener;
     private Consumer<S2C_LobbyInfoPacket> lobbyInfoListener;
+    private Consumer<S2C_GameStartedPacket> gameStartedListener;
+    private Consumer<S2C_GameEnding> gameEndingListener;
+    private Consumer<S2C_WorldState> worldStateListener;
     private int loginTag = -1;
 
     public TCPClient() throws IOException {
@@ -49,6 +58,8 @@ public class TCPClient {
         this.packetDispatcher = new PacketDispatcher();
         this.packetDispatcher.registerHandler(PacketType.S2C_LOGIN_RESPONSE, new LoginResponseHandler());
         this.packetDispatcher.registerHandler(PacketType.S2C_LOBBY_INFO, new LobbyInfoHandler());
+        this.packetDispatcher.registerHandler(PacketType.S2C_GAME_STARTED, new GameStartedPacketHandler());
+        this.packetDispatcher.registerHandler(PacketType.S2C_GAME_END, new GameEndingHandler());
         connect();
     }
 
@@ -95,6 +106,30 @@ public class TCPClient {
 
     public Consumer<S2C_LobbyInfoPacket> getLobbyInfoListener() {
         return lobbyInfoListener;
+    }
+
+    public void setGameStartedListener(Consumer<S2C_GameStartedPacket> listener) {
+        this.gameStartedListener = listener;
+    }
+
+    public Consumer<S2C_GameStartedPacket> getGameStartedListener() {
+        return gameStartedListener;
+    }
+
+    public void setGameEndingListener(Consumer<S2C_GameEnding> listener) {
+        this.gameEndingListener = listener;
+    }
+
+    public Consumer<S2C_GameEnding> getGameEndingListener() {
+        return gameEndingListener;
+    }
+
+    public void setWorldStateListener(Consumer<S2C_WorldState> listener) {
+        this.worldStateListener = listener;
+    }
+
+    public Consumer<S2C_WorldState> getWorldStateListener() {
+        return worldStateListener;
     }
 
     private void startReader() {
@@ -174,6 +209,11 @@ public class TCPClient {
         sendPacket(packet);
     }
 
+    public void sendStartLobby() throws IOException {
+        C2S_LobbyStartPacket packet = new C2S_LobbyStartPacket();
+        sendPacket(packet);
+    }
+
     private void sendPacket(Packet packet) throws IOException {
         if (loginTag > 0) {
             packet.setPlayerToken(loginTag);
@@ -197,6 +237,10 @@ public class TCPClient {
 
     public int getLoginTag() {
         return loginTag;
+    }
+
+    public AESEngine getAesEngine() {
+        return aesEngine;
     }
 
     public void setLoginTag(int loginTag) {

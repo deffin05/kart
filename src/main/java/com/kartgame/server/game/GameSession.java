@@ -13,9 +13,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.IntConsumer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -29,6 +32,7 @@ public class GameSession {
     private final CopyOnWriteArrayList<Collectible> collectibles = new CopyOnWriteArrayList<>();
     private final UDPServer udpServer;
     private final DatabaseManager db;
+    private final IntConsumer matchFinishedCallback;
     private volatile boolean matchActive = true;
     private final Instant startTime = Instant.now();
     private final SecureRandom random = new SecureRandom();
@@ -36,10 +40,11 @@ public class GameSession {
 
     private ScheduledFuture<?> gameLoopFuture;
 
-    public GameSession(int lobbyId, Map<Integer, Player> lobbyPlayers, UDPServer udpServer, DatabaseManager db) {
+    public GameSession(int lobbyId, Map<Integer, Player> lobbyPlayers, UDPServer udpServer, DatabaseManager db, IntConsumer matchFinishedCallback) {
         this.lobbyId = lobbyId;
         this.udpServer = udpServer;
         this.db = db;
+        this.matchFinishedCallback = matchFinishedCallback;
         this.players.putAll(lobbyPlayers);
 
         int gridSpot = 0;
@@ -129,6 +134,10 @@ public class GameSession {
 
             db.insertBattleLog(winner.getDatabaseId(), Duration.between(startTime, Instant.now()).toMillis(), playerIds);
         });
+
+        if (matchFinishedCallback != null) {
+            matchFinishedCallback.accept(lobbyId);
+        }
     }
 
     private void applyInput(int token, C2S_UserInput input) {
@@ -148,9 +157,11 @@ public class GameSession {
     }
 
     private void simulatePhysics() {
+        Set<Collectible> consumedCollectibles = new HashSet<>();
+
         for (KartState kart : kartStates.values()) {
-            float vx = (float) (Math.cos(kart.getAngle()) * kart.getSpeed());
-            float vy = (float) (Math.sin(kart.getAngle()) * kart.getSpeed());
+            float vx = (float) (Math.sin(kart.getAngle()) * kart.getSpeed());
+            float vy = (float) (-Math.cos(kart.getAngle()) * kart.getSpeed());
             float nextX = kart.getX() + vx;
             float nextY = kart.getY() + vy;
 
@@ -160,16 +171,27 @@ public class GameSession {
             kart.setY(nextY);
 
             for (Collectible col : collectibles) {
+                if (consumedCollectibles.contains(col)) {
+                    continue;
+                }
+
                 float dx = kart.getX() - col.getX();
                 float dy = kart.getY() - col.getY();
+                float collisionDistance = KartState.HIT_RADIUS + Collectible.RADIUS;
 
-                if ((dx * dx + dy * dy) < Collectible.RADIUS * Collectible.RADIUS) {
+                if ((dx * dx + dy * dy) < collisionDistance * collisionDistance) {
                     for (KartState kartState : kartStates.values()) {
                         if (kart.equals(kartState)) continue;
-                        kartState.setHp(kartState.getHp() - 10);
+                        kartState.setHp(Math.max(0, kartState.getHp() - 10));
                     }
+                    consumedCollectibles.add(col);
+                    break;
                 }
             }
+        }
+
+        if (!consumedCollectibles.isEmpty()) {
+            collectibles.removeAll(consumedCollectibles);
         }
     }
 

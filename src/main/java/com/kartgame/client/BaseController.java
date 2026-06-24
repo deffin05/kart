@@ -1,9 +1,15 @@
 package com.kartgame.client;
 
+import com.kartgame.common.protocol.packets.S2C_GameEnding;
+import com.kartgame.common.protocol.packets.S2C_WorldState;
+import com.kartgame.server.game.Collectible;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -11,12 +17,29 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class BaseController implements Initializable {
+    private static final float WORLD_LANE_WIDTH = 320.0f;
+    private static final float WORLD_LANE_MARGIN = 40.0f;
+    private static final float WORLD_Y_MIN = 40.0f;
+    private static final float WORLD_Y_MAX = 680.0f;
+    private static final float VIEW_LANE_WIDTH = 160.0f;
+    private static final float VIEW_Y_MIN = 20.0f;
+    private static final float VIEW_Y_MAX = 340.0f;
+
     private enum AuthAction {
         LOGIN,
         REGISTER
@@ -29,6 +52,7 @@ public class BaseController implements Initializable {
     @FXML private Button joinLobbyBtn;
     @FXML private Button createLobbyBtn;
     @FXML private Button joinLobbyFormBtn;
+    @FXML private Button startLobbyBtn;
 
     @FXML private Pane logInForm;
     @FXML private Pane signInForm;
@@ -40,6 +64,11 @@ public class BaseController implements Initializable {
 
     @FXML private StackPane menuPane;
     @FXML private StackPane lobbyPane;
+    @FXML private StackPane game;
+    @FXML private Pane lane1;
+    @FXML private Pane lane2;
+    @FXML private Pane lane3;
+    @FXML private Pane lane4;
 
     @FXML private TextField lgnForm;
     @FXML private TextField signInLgnForm;
@@ -55,15 +84,65 @@ public class BaseController implements Initializable {
     @FXML private Label lobbyIdLabel;
     @FXML private VBox lobbyPlayersList;
     @FXML private Label lobbyStatusLabel;
+    @FXML private Label hp1Label;
+    @FXML private Label hp2Label;
+    @FXML private Label hp3Label;
+    @FXML private Label hp4Label;
+    @FXML private Label winnerLabel;
+
+    @FXML private Group car1;
+    @FXML private Group car2;
+    @FXML private Group car3;
+    @FXML private Group car4;
 
     private TCPClient client;
+    private UDPClient udpClient;
     private String pendingAuthUsername;
     private AuthAction pendingAuthAction = AuthAction.LOGIN;
+
+    private final ScheduledExecutorService inputSender = Executors.newSingleThreadScheduledExecutor();
+    private volatile boolean accelerating;
+    private volatile boolean slowing;
+    private volatile boolean turningLeft;
+    private volatile boolean turningRight;
+    private volatile boolean inputLoopStarted;
+
+    private final Map<Integer, Integer> tokenToSlot = new HashMap<>();
+    private final Group[] carGroups = new Group[4];
+    private final Label[] hpLabels = new Label[4];
+    private final Pane[] lanePanes = new Pane[4];
+    private final List<Node> pickupNodes = new ArrayList<>();
 
     public void setClient(TCPClient client) {
         this.client = client;
         this.client.setLoginResponseListener(this::handleLoginResponse);
         this.client.setLobbyInfoListener(this::handleLobbyInfo);
+        this.client.setGameStartedListener(packet -> handleGameStarted());
+        this.client.setGameEndingListener(this::handleGameEnding);
+    }
+
+    public void attachScene(Scene scene) {
+        scene.setOnKeyPressed(e -> {
+            switch (e.getCode()) {
+                case W, UP -> accelerating = true;
+                case S, DOWN -> slowing = true;
+                case A, LEFT -> turningLeft = true;
+                case D, RIGHT -> turningRight = true;
+                default -> {
+                }
+            }
+        });
+
+        scene.setOnKeyReleased(e -> {
+            switch (e.getCode()) {
+                case W, UP -> accelerating = false;
+                case S, DOWN -> slowing = false;
+                case A, LEFT -> turningLeft = false;
+                case D, RIGHT -> turningRight = false;
+                default -> {
+                }
+            }
+        });
     }
 
     public void showConnectionError(String message) {
@@ -84,9 +163,30 @@ public class BaseController implements Initializable {
         joinLobby.setDisable(true);
         lobbyPane.setVisible(false);
         lobbyPane.setDisable(true);
+        game.setVisible(false);
+        game.setDisable(true);
+        gameOver.setVisible(false);
+        gameOver.setDisable(true);
         loginStatusLabel.setText("");
         signInStatusLabel.setText("");
         joinLobbyStatusLabel.setText("");
+
+        carGroups[0] = car1;
+        carGroups[1] = car2;
+        carGroups[2] = car3;
+        carGroups[3] = car4;
+
+        hpLabels[0] = hp1Label;
+        hpLabels[1] = hp2Label;
+        hpLabels[2] = hp3Label;
+        hpLabels[3] = hp4Label;
+
+        lanePanes[0] = lane1;
+        lanePanes[1] = lane2;
+        lanePanes[2] = lane3;
+        lanePanes[3] = lane4;
+
+        startInputLoop();
     }
 
     @FXML
@@ -206,6 +306,19 @@ public class BaseController implements Initializable {
     }
 
     @FXML
+    private void onStartLobbyBtnClick(ActionEvent e) {
+        if (client == null) {
+            return;
+        }
+
+        try {
+            client.sendStartLobby();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @FXML
     private void onJoinLobbyBtnClick() {
         logsPane.setVisible(false);
         logsPane.setDisable(true);
@@ -283,6 +396,7 @@ public class BaseController implements Initializable {
                 ex.printStackTrace();
             }
         }
+        stopGameplay();
         showMainMenu();
     }
 
@@ -292,6 +406,8 @@ public class BaseController implements Initializable {
         gameOver.setDisable(true);
         lobbyPane.setVisible(true);
         lobbyPane.setDisable(false);
+        game.setVisible(false);
+        game.setDisable(true);
     }
 
     private void handleLobbyInfo(com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket response) {
@@ -309,6 +425,11 @@ public class BaseController implements Initializable {
                     lobbyPlayersList.getChildren().add(playerLabel);
                 }
             }
+
+            if (game.isVisible() || gameOver.isVisible()) {
+                return;
+            }
+
             menuPane.setVisible(false);
             menuPane.setDisable(true);
             joinLobby.setVisible(false);
@@ -318,6 +439,181 @@ public class BaseController implements Initializable {
             lobbyPane.setVisible(true);
             lobbyPane.setDisable(false);
         });
+    }
+
+    private void handleGameStarted() {
+        Platform.runLater(() -> {
+            ensureUdpClient();
+
+            menuPane.setVisible(false);
+            menuPane.setDisable(true);
+            lobbyPane.setVisible(false);
+            lobbyPane.setDisable(true);
+            gameOver.setVisible(false);
+            gameOver.setDisable(true);
+            game.setVisible(true);
+            game.setDisable(false);
+            game.requestFocus();
+        });
+    }
+
+    private void handleGameEnding(S2C_GameEnding packet) {
+        Platform.runLater(() -> {
+            winnerLabel.setText("Winner: " + packet.getWinnerUsername());
+            game.setVisible(true);
+            game.setDisable(false);
+            gameOver.setVisible(true);
+            gameOver.setDisable(false);
+        });
+    }
+
+    private void handleWorldState(S2C_WorldState state) {
+        Platform.runLater(() -> {
+            for (S2C_WorldState.KartData kart : state.getKarts()) {
+                int slot = tokenToSlot.computeIfAbsent(kart.getPlayerToken(), token -> inferSlotFromWorldX(kart.getX()));
+                if (slot < 0 || slot >= carGroups.length) {
+                    continue;
+                }
+
+                Group group = carGroups[slot];
+                Label hpLabel = hpLabels[slot];
+
+                if (group != null) {
+                    group.setLayoutX(worldToLaneX(kart.getX(), slot));
+                    group.setLayoutY(worldToViewY(kart.getY()));
+                    group.setRotate(Math.toDegrees(kart.getAngle()));
+                }
+
+                if (hpLabel != null) {
+                    hpLabel.setText("HP" + (slot + 1) + ": " + kart.getHp());
+                }
+            }
+
+            renderCollectibles(state.getCollectibles());
+        });
+    }
+
+    private void renderCollectibles(List<Collectible> collectibles) {
+        for (int i = 0; i < lanePanes.length; i++) {
+            Pane lane = lanePanes[i];
+            if (lane != null) {
+                lane.getChildren().removeAll(pickupNodes);
+            }
+        }
+        pickupNodes.clear();
+
+        double viewPickupRadius = (Collectible.RADIUS / (WORLD_Y_MAX - WORLD_Y_MIN)) * (VIEW_Y_MAX - VIEW_Y_MIN);
+
+        for (Collectible col : collectibles) {
+            int slot = inferSlotFromWorldX(col.getX());
+            if (slot < 0 || slot >= lanePanes.length) {
+                continue;
+            }
+
+            Pane lane = lanePanes[slot];
+            if (lane == null) {
+                continue;
+            }
+
+            Circle pickup = new Circle(viewPickupRadius);
+            pickup.setManaged(false);
+            pickup.setMouseTransparent(true);
+            pickup.setFill(Color.web("#ffd400"));
+            pickup.setStroke(Color.web("#8a6a00"));
+            pickup.setStrokeWidth(2.0);
+            pickup.setLayoutX(worldToLaneX(col.getX(), slot));
+            pickup.setLayoutY(worldToViewY(col.getY()));
+
+            lane.getChildren().add(pickup);
+            pickupNodes.add(pickup);
+        }
+    }
+
+    private int inferSlotFromWorldX(float worldX) {
+        int slot = (int) Math.floor(worldX / WORLD_LANE_WIDTH);
+        if (slot < 0) {
+            return 0;
+        }
+        if (slot >= carGroups.length) {
+            return carGroups.length - 1;
+        }
+        return slot;
+    }
+
+    private double worldToLaneX(float worldX, int slot) {
+        float laneLeft = slot * WORLD_LANE_WIDTH;
+        float laneLocal = worldX - laneLeft;
+
+        float worldPlayable = WORLD_LANE_WIDTH - 2 * WORLD_LANE_MARGIN;
+        float viewPlayable = VIEW_LANE_WIDTH - 2 * VIEW_Y_MIN;
+        float normalized = (laneLocal - WORLD_LANE_MARGIN) / worldPlayable;
+        float clamped = Math.max(0.0f, Math.min(1.0f, normalized));
+
+        return VIEW_Y_MIN + clamped * viewPlayable;
+    }
+
+    private double worldToViewY(float worldY) {
+        float normalized = (worldY - WORLD_Y_MIN) / (WORLD_Y_MAX - WORLD_Y_MIN);
+        float clamped = Math.max(0.0f, Math.min(1.0f, normalized));
+        return VIEW_Y_MIN + clamped * (VIEW_Y_MAX - VIEW_Y_MIN);
+    }
+
+    private void ensureUdpClient() {
+        if (udpClient != null) {
+            return;
+        }
+
+        try {
+            udpClient = new UDPClient(client.getAesEngine(), client::getLoginTag);
+            udpClient.setWorldStateListener(this::handleWorldState);
+            udpClient.start();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void startInputLoop() {
+        if (inputLoopStarted) {
+            return;
+        }
+
+        inputLoopStarted = true;
+        inputSender.scheduleAtFixedRate(() -> {
+            UDPClient localUdp = udpClient;
+            if (localUdp == null) {
+                return;
+            }
+
+            try {
+                localUdp.sendInput(accelerating, slowing, turningLeft, turningRight);
+            } catch (IOException ignored) {
+            }
+        }, 0, 20, TimeUnit.MILLISECONDS);
+    }
+
+    private void stopGameplay() {
+        accelerating = false;
+        slowing = false;
+        turningLeft = false;
+        turningRight = false;
+        tokenToSlot.clear();
+
+        if (udpClient != null) {
+            udpClient.close();
+            udpClient = null;
+        }
+
+        for (Pane lane : lanePanes) {
+            if (lane != null) {
+                lane.getChildren().removeAll(pickupNodes);
+            }
+        }
+        pickupNodes.clear();
+
+        game.setVisible(false);
+        game.setDisable(true);
+        gameOver.setVisible(false);
+        gameOver.setDisable(true);
     }
 
     private void showMainMenu() {
@@ -331,6 +627,8 @@ public class BaseController implements Initializable {
         logsPane.setDisable(true);
         lobbyPane.setVisible(false);
         lobbyPane.setDisable(true);
+        game.setVisible(false);
+        game.setDisable(true);
         menuPane.setVisible(true);
         menuPane.setDisable(false);
         mainMenuBox.setVisible(true);

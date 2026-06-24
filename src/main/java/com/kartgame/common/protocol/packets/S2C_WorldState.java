@@ -101,4 +101,12 @@ public class S2C_WorldState extends Packet {
             return hp;
         }
     }
+
+    public List<KartData> getKarts() {
+        return karts;
+    }
+
+    public List<Collectible> getCollectibles() {
+        return collectibles;
+    }
 }
