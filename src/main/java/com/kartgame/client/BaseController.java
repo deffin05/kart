@@ -33,8 +33,10 @@ public class BaseController implements Initializable {
     @FXML private Pane logInForm;
     @FXML private Pane signInForm;
     @FXML private Pane joinLobby;
+    @FXML private Pane logsPane;
 
     @FXML private VBox mainMenuBox;
+    @FXML private VBox gameOver;
 
     @FXML private StackPane menuPane;
     @FXML private StackPane lobbyPane;
@@ -64,6 +66,14 @@ public class BaseController implements Initializable {
         this.client.setLobbyInfoListener(this::handleLobbyInfo);
     }
 
+    public void showConnectionError(String message) {
+        Platform.runLater(() -> {
+            loginStatusLabel.setText(message);
+            signInStatusLabel.setText(message);
+            joinLobbyStatusLabel.setText(message);
+        });
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         logInForm.setVisible(false);
@@ -81,6 +91,8 @@ public class BaseController implements Initializable {
 
     @FXML
     private void onLgInBtnClick(ActionEvent e) {
+        logsPane.setVisible(false);
+        logsPane.setDisable(true);
         signInForm.setVisible(false);
         signInForm.setDisable(true);
         logInForm.setVisible(true);
@@ -91,6 +103,8 @@ public class BaseController implements Initializable {
 
     @FXML
     private void onSignInBtnClick(ActionEvent e) {
+        logsPane.setVisible(false);
+        logsPane.setDisable(true);
         logInForm.setVisible(false);
         logInForm.setDisable(true);
         signInForm.setVisible(true);
@@ -193,6 +207,8 @@ public class BaseController implements Initializable {
 
     @FXML
     private void onJoinLobbyBtnClick() {
+        logsPane.setVisible(false);
+        logsPane.setDisable(true);
         joinLobbyStatusLabel.setText("");
         joinLobby.setVisible(true);
         joinLobby.setDisable(false);
@@ -224,6 +240,60 @@ public class BaseController implements Initializable {
         }
     }
 
+    @FXML
+    private void onLogBtnClick(ActionEvent e) {
+        logInForm.setVisible(false);
+        logInForm.setDisable(true);
+        signInForm.setVisible(false);
+        signInForm.setDisable(true);
+        joinLobby.setVisible(false);
+        joinLobby.setDisable(true);
+        mainMenuBox.setVisible(false);
+        mainMenuBox.setDisable(true);
+        logsPane.setVisible(true);
+        logsPane.setDisable(false);
+    }
+
+    @FXML
+    private void onLogInBackBtnClick(ActionEvent e) {
+        showMainMenu();
+    }
+
+    @FXML
+    private void onSignInBackBtnClick(ActionEvent e) {
+        showMainMenu();
+    }
+
+    @FXML
+    private void onJoinBackBtnClick(ActionEvent e) {
+        showMainMenu();
+    }
+
+    @FXML
+    private void onLogsBackBtnClick(ActionEvent e) {
+        showMainMenu();
+    }
+
+    @FXML
+    private void onLeaveLobbyBtnClick(ActionEvent e) {
+        if (client != null) {
+            try {
+                client.sendLeaveLobby();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        showMainMenu();
+    }
+
+    @FXML
+    private void onBackToLobbyBtnClick(ActionEvent e) {
+        gameOver.setVisible(false);
+        gameOver.setDisable(true);
+        lobbyPane.setVisible(true);
+        lobbyPane.setDisable(false);
+    }
+
     private void handleLobbyInfo(com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket response) {
         Platform.runLater(() -> {
             if (lobbyIdLabel != null) {
@@ -248,5 +318,22 @@ public class BaseController implements Initializable {
             lobbyPane.setVisible(true);
             lobbyPane.setDisable(false);
         });
+    }
+
+    private void showMainMenu() {
+        logInForm.setVisible(false);
+        logInForm.setDisable(true);
+        signInForm.setVisible(false);
+        signInForm.setDisable(true);
+        joinLobby.setVisible(false);
+        joinLobby.setDisable(true);
+        logsPane.setVisible(false);
+        logsPane.setDisable(true);
+        lobbyPane.setVisible(false);
+        lobbyPane.setDisable(true);
+        menuPane.setVisible(true);
+        menuPane.setDisable(false);
+        mainMenuBox.setVisible(true);
+        mainMenuBox.setDisable(false);
     }
 }

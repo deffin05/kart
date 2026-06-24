@@ -1,0 +1,76 @@
+
+
+.root {
+    -fx-font-size: 16px;
+    font-size: 16px;
+    -fx-font-family: "Joystix Monospace", "Monospaced";
+    font-family: "Joystix Monospace", "Monospaced";
+}
+
+* {
+    -fx-font-family: "Joystix Monospace", "Monospaced";
+    font-family: "Joystix Monospace", "Monospaced";
+}
+
+.split-pane {
+    -fx-background-color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.button {
+    -fx-background-color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0);
+
+    -fx-border: none;
+    border: none;
+}
+
+.button:hover {
+    -fx-text-fill: #f2ff00;
+}
+
+.label,
+.button,
+.text-field,
+.password-field {
+    -fx-font-family: "Joystix Monospace", "Monospaced";
+    font-family: "Joystix Monospace", "Monospaced";
+    -fx-text-fill: #ffffff;
+}
+
+Pane {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.menu {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.lobby {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.lane {
+    -fx-background-color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.3);
+
+    -fx-min-width: 225px;
+    min-width: 225px;
+    -fx-max-width: 225px;
+    max-width: 225px;
+}
+
+.gameOver {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.title {
+    -fx-font-size: 32px;
+    font-size: 32px;
+    -fx-font-weight: bold;
+    font-weight: bold;
+}

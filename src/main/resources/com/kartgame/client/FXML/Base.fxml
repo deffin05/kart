@@ -32,122 +32,196 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 
+<?import javafx.scene.Group?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
 
-<StackPane xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kartgame.client.BaseController">
+<StackPane prefHeight="470.0" prefWidth="903.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kartgame.client.BaseController">
    <children>
+      <ImageView fitHeight="508.0" fitWidth="1085.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../gifs/Background.gif" />
+         </image>
+      </ImageView>
       <StackPane fx:id="menuPane">
          <children>
-            <VBox fx:id="mainMenuBox" disable="false" visible="true">
+            <VBox fx:id="mainMenuBox">
                <children>
-                <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0">
+                <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="510.0" prefWidth="903.0">
                      <children>
-                        <SplitPane dividerPositions="0.29797979797979796" layoutY="-1.0" prefHeight="400.0" prefWidth="640.0">
+                        <SplitPane dividerPositions="0.3" layoutY="-1.0" prefHeight="510.0" prefWidth="900.0">
                           <items>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" styleClass="menu">
                                  <children>
-                                    <Button fx:id="createLobbyBtn" layoutX="36.0" layoutY="124.0" mnemonicParsing="false" onAction="#onCreateLobbyBtnClick" text="Create Lobby" />
-                                    <Label layoutX="40.0" layoutY="52.0" text="Kart" />
-                                    <Button fx:id="joinLobbyBtn" layoutX="36.0" layoutY="162.0" mnemonicParsing="false" onAction="#onJoinLobbyBtnClick" prefHeight="26.0" prefWidth="86.0" text="Join Lobby" />
-                                    <Button fx:id="signInBtn" layoutX="36.0" layoutY="199.0" mnemonicParsing="false" onAction="#onSignInBtnClick" prefHeight="26.0" prefWidth="86.0" text="Sign in" />
-                                    <Button fx:id="lgInBtn" layoutX="36.0" layoutY="239.0" mnemonicParsing="false" onAction="#onLgInBtnClick" prefHeight="26.0" prefWidth="86.0" text="Log In" />
-                                    <Label fx:id="nicknameLabel" layoutX="22.0" layoutY="367.0" text="Nickname" />
+                                    <Button fx:id="createLobbyBtn" layoutX="36.0" layoutY="124.0" mnemonicParsing="false" onAction="#onCreateLobbyBtnClick" prefHeight="26.0" prefWidth="191.0" text="Create Lobby" />
+                                    <Label layoutX="78.0" layoutY="39.0" styleClass="title" text="Kart" />
+                                    <Button fx:id="joinLobbyBtn" layoutX="36.0" layoutY="162.0" mnemonicParsing="false" onAction="#onJoinLobbyBtnClick" prefHeight="26.0" prefWidth="191.0" text="Join Lobby" />
+                                    <Button fx:id="signInBtn" layoutX="36.0" layoutY="199.0" mnemonicParsing="false" onAction="#onSignInBtnClick" prefHeight="26.0" prefWidth="191.0" text="Sign in" />
+                                    <Button fx:id="lgInBtn" layoutX="36.0" layoutY="239.0" mnemonicParsing="false" onAction="#onLgInBtnClick" prefHeight="26.0" prefWidth="191.0" text="Log In" />
+                                    <Label fx:id="nicknameLabel" layoutX="14.0" layoutY="472.0" text="Nickname" />
+                                    <Button fx:id="logBtn" layoutX="36.0" layoutY="281.0" mnemonicParsing="false" onAction="#onLogBtnClick" prefHeight="26.0" prefWidth="191.0" text="Logs" />
                                  </children>
                               </AnchorPane>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="462.0" prefWidth="633.0" />
                           </items>
                         </SplitPane>
                      </children>
                 </AnchorPane>
                </children>
             </VBox>
-            <Pane fx:id="logInForm" disable="true" prefHeight="400.0" prefWidth="554.0" visible="false">
+            <Pane fx:id="logInForm" disable="true" maxHeight="510.0" maxWidth="905.0" prefHeight="510.0" prefWidth="903.0" visible="false">
                <children>
-                  <Button fx:id="lgInFormBtn" layoutX="283.0" layoutY="239.0" mnemonicParsing="false" onAction="#onLgInFormBtnClick" text="Log In" />
-                  <PasswordField fx:id="pswrdForm" layoutX="283.0" layoutY="186.0" />
-                  <TextField fx:id="lgnForm" layoutX="283.0" layoutY="136.0" />
-                  <Label layoutX="208.0" layoutY="190.0" text="Password" />
-                  <Label layoutX="208.0" layoutY="140.0" text="Login" />
-                  <Label fx:id="loginStatusLabel" layoutX="208.0" layoutY="270.0" text="" />
+                  <Button fx:id="lgInFormBtn" layoutX="401.0" layoutY="298.0" mnemonicParsing="false" onAction="#onLgInFormBtnClick" text="Log In" />
+                  <PasswordField fx:id="pswrdForm" layoutX="413.0" layoutY="230.0" />
+                  <TextField fx:id="lgnForm" layoutX="413.0" layoutY="180.0" />
+                  <Label layoutX="298.0" layoutY="236.0" text="Password" />
+                  <Label layoutX="338.0" layoutY="184.0" text="Login" />
+                  <Label fx:id="loginStatusLabel" layoutX="324.0" layoutY="349.0" />
+                  <Button fx:id="logInBackBtn" layoutX="415.0" layoutY="441.0" mnemonicParsing="false" onAction="#onLogInBackBtnClick" text="Back" />
                </children>
             </Pane>
             <Pane fx:id="signInForm" disable="true" prefHeight="400.0" prefWidth="554.0" visible="false">
                <children>
-                  <Button fx:id="signInFormBtn" layoutX="283.0" layoutY="239.0" mnemonicParsing="false" onAction="#onSignInFormBtnClick" text="Sign in" />
-                  <PasswordField fx:id="signInPswrdForm" layoutX="283.0" layoutY="186.0" />
-                  <TextField fx:id="signInLgnForm" layoutX="283.0" layoutY="136.0" />
-                  <Label layoutX="208.0" layoutY="190.0" text="Password" />
-                  <Label layoutX="208.0" layoutY="140.0" text="Login" />
-                  <Label fx:id="signInStatusLabel" layoutX="208.0" layoutY="270.0" text="" />
+                  <Button fx:id="signInFormBtn" layoutX="395.0" layoutY="304.0" mnemonicParsing="false" onAction="#onSignInFormBtnClick" text="Sign in" />
+                  <PasswordField fx:id="signInPswrdForm" layoutX="413.0" layoutY="236.0" />
+                  <TextField fx:id="signInLgnForm" layoutX="413.0" layoutY="186.0" />
+                  <Label layoutX="298.0" layoutY="242.0" text="Password" />
+                  <Label layoutX="338.0" layoutY="190.0" text="Login" />
+                  <Label fx:id="signInStatusLabel" layoutX="338.0" layoutY="354.0" prefHeight="21.0" prefWidth="0.0" />
+                  <Button fx:id="signInBackBtn" layoutX="415.0" layoutY="446.0" mnemonicParsing="false" onAction="#onSignInBackBtnClick" text="Back" />
                </children>
             </Pane>
             <Pane fx:id="joinLobby" disable="true" prefHeight="400.0" prefWidth="554.0" visible="false">
                <children>
-                  <Button fx:id="joinLobbyFormBtn" layoutX="284.0" layoutY="216.0" mnemonicParsing="false" onAction="#onJoinLobbyFormBtnClick" text="Join Lobby" />
-                  <TextField fx:id="lobbyId" layoutX="282.0" layoutY="159.0" />
-                  <Label layoutX="209.0" layoutY="163.0" text="Lobby ID" />
-                  <Label fx:id="joinLobbyStatusLabel" layoutX="209.0" layoutY="256.0" text="" />
+                  <Button fx:id="joinLobbyFormBtn" layoutX="375.0" layoutY="255.0" mnemonicParsing="false" onAction="#onJoinLobbyFormBtnClick" text="Join Lobby" />
+                  <TextField fx:id="lobbyId" layoutX="412.0" layoutY="194.0" />
+                  <Label layoutX="296.0" layoutY="200.0" text="Lobby ID" />
+                  <Label fx:id="joinLobbyStatusLabel" layoutX="339.0" layoutY="291.0" text="" />
+                  <Button fx:id="joinBackBtn" layoutX="415.0" layoutY="448.0" mnemonicParsing="false" onAction="#onJoinBackBtnClick" text="Back" />
+               </children>
+            </Pane>
+            <Pane fx:id="logsPane" disable="true" prefHeight="200.0" prefWidth="200.0" visible="false">
+               <children>
+                  <Label layoutX="399.0" layoutY="25.0" styleClass="title" text="Logs" />
+                  <Button fx:id="logsBackBtn" layoutX="401.0" layoutY="452.0" mnemonicParsing="false" onAction="#onLogsBackBtnClick" text="Back" />
                </children>
             </Pane>
          </children>
       </StackPane>
-      <StackPane fx:id="lobbyPane" disable="true" visible="false">
+      <StackPane fx:id="lobbyPane" disable="true" styleClass="lobby" visible="false">
          <children>
-            <VBox prefHeight="400.0" prefWidth="640.0" spacing="10.0" alignment="TOP_CENTER">
+            <VBox alignment="TOP_CENTER" prefHeight="400.0" prefWidth="640.0" spacing="10.0">
               <children>
-                  <AnchorPane prefHeight="400.0" prefWidth="640.0">
+                  <AnchorPane prefHeight="510.0" prefWidth="903.0">
                      <children>
-                        <Button layoutX="300.0" layoutY="346.0" mnemonicParsing="false" text="Start" />
-                        <Label layoutX="304.0" layoutY="23.0" text="Lobby" />
+                        <Button layoutX="407.0" layoutY="376.0" mnemonicParsing="false" text="Start" />
+                        <Label layoutX="418.0" layoutY="39.0" text="Lobby" />
                         <Label fx:id="lobbyIdLabel" layoutX="40.0" layoutY="70.0" text="Lobby ID:" />
-                        <Label fx:id="lobbyStatusLabel" layoutX="40.0" layoutY="100.0" text="Status" />
-                        <VBox fx:id="lobbyPlayersList" layoutX="40.0" layoutY="140.0" spacing="5.0" prefWidth="560.0" prefHeight="180.0" />
+                        <Label fx:id="lobbyStatusLabel" layoutX="40.0" layoutY="122.0" text="Status" />
+                        <VBox fx:id="lobbyPlayersList" layoutX="40.0" layoutY="165.0" prefHeight="180.0" prefWidth="560.0" spacing="5.0" />
+                        <Button fx:id="leaveLobbyBtn" layoutX="729.0" layoutY="450.0" mnemonicParsing="false" onAction="#onLeaveLobbyBtnClick" text="Leave Lobby" />
                      </children>
                   </AnchorPane>
               </children>
             </VBox>
          </children>
       </StackPane>
-      <StackPane disable="true" visible="false">
+      <StackPane fx:id="game" disable="true" visible="false">
          <children>
             <VBox prefHeight="200.0" prefWidth="100.0">
                <children>
-                  <AnchorPane prefHeight="400.0" prefWidth="640.0">
+                  <AnchorPane prefHeight="469.0" prefWidth="902.0">
                      <children>
-                        <HBox prefHeight="400.0" prefWidth="640.0">
+                        <HBox prefHeight="464.0" prefWidth="902.0">
                            <children>
-                              <Pane prefHeight="400.0" prefWidth="160.0">
+                              <Pane prefHeight="400.0" prefWidth="160.0" styleClass="lane">
                                  <children>
-                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" layoutX="63.0" layoutY="300.0" stroke="BLACK" strokeType="INSIDE" width="33.0" />
+                                    <Group fx:id="car1" layoutX="96.0" layoutY="319.0">
+                                       <children>
+                                          <Rectangle fx:id="car1Hitbox" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" stroke="BLACK" strokeType="INSIDE" visible="false" width="33.0" />
+                                          <ImageView fitHeight="68.0" fitWidth="42.0" layoutX="-4.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../gifs/RedCar.gif" />
+                                             </image>
+                                          </ImageView>
+                                       </children>
+                                    </Group>
+                                    <Label layoutX="86.0" layoutY="427.0" text="HP1" />
                                  </children>
                               </Pane>
-                              <Pane prefHeight="400.0" prefWidth="160.0">
+                              <Pane prefHeight="400.0" prefWidth="160.0" styleClass="lane">
                                  <children>
-                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" layoutX="63.0" layoutY="301.0" stroke="BLACK" strokeType="INSIDE" width="33.0" />
+                                    <Group fx:id="car2" layoutX="96.0" layoutY="315.0">
+                                       <children>
+                                          <Rectangle fx:id="car2Hitbox" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" stroke="BLACK" strokeType="INSIDE" visible="false" width="33.0" />
+                                          <ImageView fitHeight="104.0" fitWidth="43.0" layoutX="-5.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../gifs/BlueCar.gif" />
+                                             </image>
+                                          </ImageView>
+                                       </children>
+                                    </Group>
+                                    <Label layoutX="93.0" layoutY="429.0" text="HP2" />
                                  </children>
                               </Pane>
-                              <Pane prefHeight="400.0" prefWidth="160.0">
+                              <Pane prefHeight="400.0" prefWidth="160.0" styleClass="lane">
                                  <children>
-                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" layoutX="64.0" layoutY="299.0" stroke="BLACK" strokeType="INSIDE" width="33.0" />
+                                    <Group fx:id="car3" layoutX="96.0" layoutY="318.0">
+                                       <children>
+                                          <Rectangle fx:id="car3Hitbox" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" stroke="BLACK" strokeType="INSIDE" visible="false" width="33.0" />
+                                          <ImageView fitHeight="108.0" fitWidth="42.0" layoutX="-4.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../gifs/GreenCar.gif" />
+                                             </image>
+                                          </ImageView>
+                                       </children>
+                                    </Group>
+                                    <Label layoutX="97.0" layoutY="429.0" text="HP3" />
                                  </children>
                               </Pane>
-                              <Pane prefHeight="400.0" prefWidth="160.0">
+                              <Pane prefHeight="400.0" prefWidth="160.0" styleClass="lane">
                                  <children>
-                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" layoutX="64.0" layoutY="300.0" stroke="BLACK" strokeType="INSIDE" width="33.0" />
+                                    <Group fx:id="car4" layoutX="96.0" layoutY="309.0">
+                                       <children>
+                                          <Rectangle fx:id="car4Hitbox" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="62.0" stroke="BLACK" strokeType="INSIDE" visible="false" width="33.0" />
+                                          <ImageView fitHeight="97.0" fitWidth="42.0" layoutX="-4.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../gifs/YellowCar.gif" />
+                                             </image>
+                                          </ImageView>
+                                       </children>
+                                    </Group>
+                                    <Label layoutX="92.0" layoutY="425.0" text="HP4" />
                                  </children>
                               </Pane>
                            </children>
                         </HBox>
+                     </children>
+                  </AnchorPane>
+               </children>
+            </VBox>
+            <VBox fx:id="gameOver" disable="true" prefHeight="200.0" prefWidth="100.0" styleClass="gameOver" visible="false">
+               <children>
+                  <AnchorPane prefHeight="465.0" prefWidth="902.0">
+                     <children>
+                        <Button layoutX="354.0" layoutY="405.0" mnemonicParsing="false" onAction="#onBackToLobbyBtnClick" text="Back to Lobby" />
+                        <Label layoutX="331.0" layoutY="34.0" styleClass="title" text="Game Over">
+                           <font>
+                              <Font name="JoystixMonospace-Regular" size="12.0" />
+                           </font>
+                        </Label>
                      </children>
                   </AnchorPane>
                </children>
