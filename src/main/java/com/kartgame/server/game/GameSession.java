@@ -8,6 +8,7 @@ import com.kartgame.server.database.DatabaseManager;
 import com.kartgame.server.lobby.Player;
 import com.kartgame.server.network.UDPServer;
 
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
 
 public class GameSession {
@@ -24,10 +26,13 @@ public class GameSession {
     private final Map<Integer, KartState> kartStates = new ConcurrentHashMap<>();
     private final Map<Integer, Player> players = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<PlayerInputEvent> incomingInputs = new ConcurrentLinkedQueue<>();
+    private final CopyOnWriteArrayList<Collectible> collectibles = new CopyOnWriteArrayList<>();
     private final UDPServer udpServer;
     private final DatabaseManager db;
     private volatile boolean matchActive = true;
     private final Instant startTime = Instant.now();
+    private final SecureRandom random = new SecureRandom();
+    private int tickCounter = 0;
 
     private ScheduledFuture<?> gameLoopFuture;
 
@@ -58,6 +63,13 @@ public class GameSession {
             while ((event = incomingInputs.poll()) != null) {
                 applyInput(event.playerToken, event.input);
             }
+
+            tickCounter++;
+            if (tickCounter >= 60) {
+                spawnCollectible();
+                tickCounter = 0;
+            }
+
             simulatePhysics();
             broadcastWorldState();
             Optional<Integer> winner = checkWinConditions();
@@ -81,6 +93,16 @@ public class GameSession {
             return Optional.of(alivePlayer.getPlayerToken());
         }
         return Optional.empty();
+    }
+
+    private void spawnCollectible() {
+        if (collectibles.size() > 60) return;
+
+        float rx = random.nextInt(0, players.size()) * 320f + random.nextFloat(40f, 280f);;
+        float ry = random.nextFloat(40f, 680f);
+
+        Collectible col = new Collectible(rx, ry);
+        collectibles.add(col);
     }
 
     private synchronized void triggerEndGame(int winnerToken) {
@@ -132,26 +154,22 @@ public class GameSession {
             float nextX = kart.getX() + vx;
             float nextY = kart.getY() + vy;
 
-            float minX = kart.getBoundingBox().getLeft();
-            float maxX = kart.getBoundingBox().getRight();
-
-            if (nextX < minX) {
-                nextX = minX;
-            } else if (nextX > maxX) {
-                nextX = maxX;
-            }
-
-            float minY = kart.getBoundingBox().getBottom();
-            float maxY = kart.getBoundingBox().getTop();
-
-            if (nextY < minY) {
-                nextY = minY;
-            } else if (nextY > maxY) {
-                nextY = maxY;
-            }
-
+            nextX = Math.max(kart.getBoundingBox().getLeft(), Math.min(kart.getBoundingBox().getRight(), nextX));
+            nextY = Math.max(kart.getBoundingBox().getBottom(), Math.min(kart.getBoundingBox().getTop(), nextY));
             kart.setX(nextX);
             kart.setY(nextY);
+
+            for (Collectible col : collectibles) {
+                float dx = kart.getX() - col.getX();
+                float dy = kart.getY() - col.getY();
+
+                if ((dx * dx + dy * dy) < Collectible.RADIUS * Collectible.RADIUS) {
+                    for (KartState kartState : kartStates.values()) {
+                        if (kart.equals(kartState)) continue;
+                        kartState.setHp(kartState.getHp() - 10);
+                    }
+                }
+            }
         }
     }
 
@@ -166,8 +184,7 @@ public class GameSession {
                     state.getHp()
             ));
         }
-
-        S2C_WorldState worldState = new S2C_WorldState(karts);
+        S2C_WorldState worldState = new S2C_WorldState(karts, collectibles);
         broadcastUdp(worldState);
     }
 

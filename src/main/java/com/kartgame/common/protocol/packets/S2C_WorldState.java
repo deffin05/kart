@@ -2,6 +2,7 @@ package com.kartgame.common.protocol.packets;
 
 import com.kartgame.common.protocol.Packet;
 import com.kartgame.common.protocol.PacketType;
+import com.kartgame.server.game.Collectible;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -10,10 +11,12 @@ import java.util.List;
 
 public class S2C_WorldState extends Packet {
     private List<KartData> karts;
+    private List<Collectible> collectibles;
 
-    public S2C_WorldState(Collection<KartData> karts) {
+    public S2C_WorldState(Collection<KartData> karts, Collection<Collectible> collectibles) {
         super(PacketType.S2C_WORLD_STATE);
         this.karts = new ArrayList<>(karts);
+        this.collectibles = new ArrayList<>(collectibles);
     }
 
     public S2C_WorldState() {
@@ -31,6 +34,12 @@ public class S2C_WorldState extends Packet {
             buffer.putFloat(kart.getAngle());
             buffer.putInt(kart.getHp());
         }
+
+        buffer.put((byte) collectibles.size());
+        for (Collectible col : collectibles) {
+            buffer.putFloat(col.getX());
+            buffer.putFloat(col.getY());
+        }
     }
 
     @Override
@@ -47,6 +56,13 @@ public class S2C_WorldState extends Packet {
             int hp = buffer.getInt();
 
             karts.add(new KartData(token, x, y, angle, hp));
+        }
+
+        int collectibleCount = buffer.get() & 0xFF;
+
+        this.collectibles = new ArrayList<>(collectibleCount);
+        for (int i = 0; i < collectibleCount; i++) {
+            this.collectibles.add(new Collectible(buffer.getFloat(), buffer.getFloat()));
         }
     }
 
