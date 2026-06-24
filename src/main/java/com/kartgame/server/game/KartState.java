@@ -4,6 +4,8 @@ public class KartState {
     private int playerToken;
     private float x;
     private float y;
+    private int hp = 100;
+    private float angle = 0.0f;
     private float speed = 0.0f;
 
     public KartState(int playerToken, float x, float y) {
@@ -38,5 +40,21 @@ public class KartState {
 
     public void setX(float x) {
         this.x = x;
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
+
+    public float getAngle() {
+        return angle;
+    }
+
+    public void setAngle(float angle) {
+        this.angle = angle;
     }
 }

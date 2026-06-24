@@ -21,8 +21,8 @@ public class GameSession {
         int gridSpot = 0;
         for (Player player : players.values()) {
             // TODO: align with the actual map
-            float startX = 100.0f + (gridSpot * 60.0f);
-            float startY = 300.0f;
+            float startX = 160.0f + (gridSpot * 320.0f);
+            float startY = 360.0f;
             kartStates.put(player.getToken(), new KartState(player.getToken(), startX, startY));
             gridSpot++;
         }
