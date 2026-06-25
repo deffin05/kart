@@ -74,3 +74,38 @@ Pane {
     -fx-font-weight: bold;
     font-weight: bold;
 }
+
+.logs-table {
+    -fx-background-color: #000000;
+    -fx-control-inner-background: #000000;
+    -fx-text-background-color: #ffffff;
+    -fx-table-cell-border-color: #2b2b2b;
+}
+
+.logs-table .column-header-background {
+    -fx-background-color: #000000;
+}
+
+.logs-table .column-header,
+.logs-table .filler {
+    -fx-background-color: #000000;
+    -fx-border-color: #2b2b2b;
+}
+
+.logs-table .column-header .label {
+    -fx-text-fill: #ffffff;
+}
+
+.logs-table .table-row-cell {
+    -fx-background-color: #000000;
+    -fx-table-cell-border-color: #2b2b2b;
+}
+
+.logs-table .table-row-cell:filled:selected {
+    -fx-background-color: #1f1f1f;
+}
+
+.logs-table .table-cell {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: transparent;
+}

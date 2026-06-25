@@ -13,6 +13,8 @@ public enum PacketType {
     C2S_LEAVE_LOBBY(8),
     S2C_GAME_STARTED(9),
     S2C_GAME_END(10),
+    C2S_RECENT_GAMES_REQUEST(11),
+    S2C_RECENT_GAMES_RESPONSE(12),
 
     // UDP
     C2S_USER_INPUT(41),

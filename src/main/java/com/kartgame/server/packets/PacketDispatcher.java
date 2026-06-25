@@ -18,6 +18,7 @@ public class PacketDispatcher {
         handlers.put(PacketType.C2S_JOIN_LOBBY, new JoinLobbyHandler(lobbyManager));
         handlers.put(PacketType.C2S_LEAVE_LOBBY, new LeaveLobbyHandler(lobbyManager));
         handlers.put(PacketType.C2S_START_LOBBY, new StartGameHandler(lobbyManager));
+        handlers.put(PacketType.C2S_RECENT_GAMES_REQUEST, new RecentGamesRequestHandler(db));
     }
 
     @SuppressWarnings("unchecked")
@@ -30,7 +31,10 @@ public class PacketDispatcher {
             return;
         }
 
-        if (type != PacketType.C2S_LOGIN && type != PacketType.C2S_REGISTER && !client.isAuthenticated()) {
+        if (type != PacketType.C2S_LOGIN
+            && type != PacketType.C2S_REGISTER
+            && type != PacketType.C2S_RECENT_GAMES_REQUEST
+            && !client.isAuthenticated()) {
             System.err.println("Security alert: Unauthenticated user attempted: " + type + ", user: " + client.getSocket());
             client.close();
             return;
