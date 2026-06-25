@@ -53,6 +53,7 @@ public class BaseController implements Initializable {
     @FXML private Button lgInBtn;
     @FXML private Button lgInFormBtn;
     @FXML private Button signInBtn;
+    @FXML private Button logBtn;
     @FXML private Button signInFormBtn;
     @FXML private Button joinLobbyBtn;
     @FXML private Button createLobbyBtn;
@@ -717,6 +718,24 @@ public class BaseController implements Initializable {
             signInBtn.setVisible(!authorized);
             signInBtn.setManaged(!authorized);
             signInBtn.setDisable(authorized);
+        }
+
+        if (createLobbyBtn != null) {
+            createLobbyBtn.setVisible(authorized);
+            createLobbyBtn.setManaged(authorized);
+            createLobbyBtn.setDisable(!authorized);
+        }
+
+        if (joinLobbyBtn != null) {
+            joinLobbyBtn.setVisible(authorized);
+            joinLobbyBtn.setManaged(authorized);
+            joinLobbyBtn.setDisable(!authorized);
+        }
+
+        if (logBtn != null) {
+            logBtn.setVisible(authorized);
+            logBtn.setManaged(authorized);
+            logBtn.setDisable(!authorized);
         }
     }
 
