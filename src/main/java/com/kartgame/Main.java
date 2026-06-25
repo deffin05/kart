@@ -10,13 +10,14 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
     private TCPClient client;
+    private BaseController controller;
 
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/kartgame/client/FXML/Base.fxml"));
         Parent root = loader.load();
 
-        BaseController controller = loader.getController();
+        controller = loader.getController();
         this.client = new TCPClient();
         controller.setClient(client);
 
@@ -30,6 +31,7 @@ public class Main extends Application {
     @Override
     public void stop() throws Exception {
         this.client.close();
+        this.controller.close();
         super.stop();
     }
 

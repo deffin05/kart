@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class BaseController implements Initializable {
@@ -113,6 +114,7 @@ public class BaseController implements Initializable {
     private boolean authorized;
 
     private final ScheduledExecutorService inputSender = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> inputSenderFuture;
     private volatile boolean accelerating;
     private volatile boolean slowing;
     private volatile boolean turningLeft;
@@ -641,7 +643,7 @@ public class BaseController implements Initializable {
         }
 
         inputLoopStarted = true;
-        inputSender.scheduleAtFixedRate(() -> {
+        inputSenderFuture = inputSender.scheduleAtFixedRate(() -> {
             UDPClient localUdp = udpClient;
             if (localUdp == null) {
                 return;
@@ -664,6 +666,10 @@ public class BaseController implements Initializable {
         if (udpClient != null) {
             udpClient.close();
             udpClient = null;
+        }
+
+        if (!inputSenderFuture.isCancelled()) {
+            inputSenderFuture.cancel(false);
         }
 
         for (Pane lane : lanePanes) {
@@ -740,6 +746,12 @@ public class BaseController implements Initializable {
 
         public String getPlayersCount() {
             return playersCount;
+        }
+    }
+
+    public void close() {
+        if (!inputSender.isShutdown()) {
+            inputSender.shutdownNow();
         }
     }
 }

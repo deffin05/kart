@@ -1,7 +1,7 @@
 package com.kartgame.server.game;
 
 public class Collectible {
-    public static final float RADIUS = 16f;
+    public static final float RADIUS = 24f;
     private final float x;
     private final float y;
 

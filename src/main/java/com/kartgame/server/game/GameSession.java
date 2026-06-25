@@ -144,13 +144,13 @@ public class GameSession {
         KartState kart = kartStates.get(token);
         if (kart == null) return;
 
-        if (input.isLeft()) kart.setAngle(kart.getAngle() - 0.05f);
-        if (input.isRight()) kart.setAngle(kart.getAngle() + 0.05f);
+        if (input.isLeft()) kart.setAngle(kart.getAngle() - 0.06f);
+        if (input.isRight()) kart.setAngle(kart.getAngle() + 0.06f);
 
         if (input.isAccelerating()) {
-            kart.setSpeed(Math.min(kart.getSpeed() + 1.0f, 80.0f));
+            kart.setSpeed(Math.min(kart.getSpeed() + 0.5f, 30.0f));
         } else if (input.isSlowing()) {
-            kart.setSpeed(Math.max(kart.getSpeed() - 2.0f, -20.0f));
+            kart.setSpeed(Math.max(kart.getSpeed() - 1.0f, -5.0f));
         } else {
             kart.setSpeed(kart.getSpeed() * 0.95f);
         }

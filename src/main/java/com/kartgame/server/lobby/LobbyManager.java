@@ -99,7 +99,7 @@ public class LobbyManager {
     private int generateLobbyCode() {
         int code;
         do {
-            code = random.nextInt();
+            code = random.nextInt(100_000) ;
         } while (lobbyMap.containsKey(code));
 
         return code;
