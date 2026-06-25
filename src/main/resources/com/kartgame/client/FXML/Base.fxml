@@ -70,10 +70,10 @@
                                     <Button fx:id="createLobbyBtn" layoutX="36.0" layoutY="124.0" mnemonicParsing="false" onAction="#onCreateLobbyBtnClick" prefHeight="26.0" prefWidth="191.0" text="Create Lobby" />
                                     <Label layoutX="78.0" layoutY="39.0" styleClass="title" text="Kart" />
                                     <Button fx:id="joinLobbyBtn" layoutX="36.0" layoutY="162.0" mnemonicParsing="false" onAction="#onJoinLobbyBtnClick" prefHeight="26.0" prefWidth="191.0" text="Join Lobby" />
-                                    <Button fx:id="signInBtn" layoutX="36.0" layoutY="199.0" mnemonicParsing="false" onAction="#onSignInBtnClick" prefHeight="26.0" prefWidth="191.0" text="Sign in" />
+                                    <Button fx:id="signInBtn" layoutX="35.0" layoutY="279.0" mnemonicParsing="false" onAction="#onSignInBtnClick" prefHeight="26.0" prefWidth="191.0" text="Sign in" />
                                     <Button fx:id="lgInBtn" layoutX="36.0" layoutY="239.0" mnemonicParsing="false" onAction="#onLgInBtnClick" prefHeight="26.0" prefWidth="191.0" text="Log In" />
                                     <Label fx:id="nicknameLabel" layoutX="14.0" layoutY="472.0" text="Nickname" />
-                                    <Button fx:id="logBtn" layoutX="36.0" layoutY="281.0" mnemonicParsing="false" onAction="#onLogBtnClick" prefHeight="26.0" prefWidth="191.0" text="Logs" />
+                                    <Button fx:id="logBtn" layoutX="37.0" layoutY="200.0" mnemonicParsing="false" onAction="#onLogBtnClick" prefHeight="26.0" prefWidth="191.0" text="Logs" />
                                  </children>
                               </AnchorPane>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="462.0" prefWidth="633.0" />

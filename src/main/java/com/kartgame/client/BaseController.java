@@ -110,6 +110,7 @@ public class BaseController implements Initializable {
     private UDPClient udpClient;
     private String pendingAuthUsername;
     private AuthAction pendingAuthAction = AuthAction.LOGIN;
+    private boolean authorized;
 
     private final ScheduledExecutorService inputSender = Executors.newSingleThreadScheduledExecutor();
     private volatile boolean accelerating;
@@ -131,6 +132,8 @@ public class BaseController implements Initializable {
         this.client.setGameStartedListener(packet -> handleGameStarted());
         this.client.setGameEndingListener(this::handleGameEnding);
         this.client.setRecentGamesListener(this::handleRecentGames);
+        this.authorized = this.client.getLoginTag() > 0;
+        updateAuthButtonsVisibility();
     }
 
     public void attachScene(Scene scene) {
@@ -183,6 +186,7 @@ public class BaseController implements Initializable {
         signInStatusLabel.setText("");
         joinLobbyStatusLabel.setText("");
         logsStatusLabel.setText("");
+        updateAuthButtonsVisibility();
 
         logsDateColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getBattleDate()));
         logsWinnerColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getWinnerUsername()));
@@ -287,6 +291,7 @@ public class BaseController implements Initializable {
         Platform.runLater(() -> {
             Label activeStatusLabel = pendingAuthAction == AuthAction.REGISTER ? signInStatusLabel : loginStatusLabel;
             if (response.getToken() > 0) {
+                authorized = true;
                 if (pendingAuthUsername != null && !pendingAuthUsername.isEmpty()) {
                     nicknameLabel.setText(pendingAuthUsername);
                 }
@@ -303,6 +308,7 @@ public class BaseController implements Initializable {
                 lobbyPane.setDisable(true);
                 mainMenuBox.setVisible(true);
                 mainMenuBox.setDisable(false);
+                updateAuthButtonsVisibility();
                 joinLobbyStatusLabel.setText("");
             } else {
                 activeStatusLabel.setText(response.getMessage());
@@ -690,6 +696,21 @@ public class BaseController implements Initializable {
         menuPane.setDisable(false);
         mainMenuBox.setVisible(true);
         mainMenuBox.setDisable(false);
+        updateAuthButtonsVisibility();
+    }
+
+    private void updateAuthButtonsVisibility() {
+        if (lgInBtn != null) {
+            lgInBtn.setVisible(!authorized);
+            lgInBtn.setManaged(!authorized);
+            lgInBtn.setDisable(authorized);
+        }
+
+        if (signInBtn != null) {
+            signInBtn.setVisible(!authorized);
+            signInBtn.setManaged(!authorized);
+            signInBtn.setDisable(authorized);
+        }
     }
 
     public static class RecentGameRow {
