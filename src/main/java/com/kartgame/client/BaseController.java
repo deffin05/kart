@@ -209,8 +209,6 @@ public class BaseController implements Initializable {
         lanePanes[1] = lane2;
         lanePanes[2] = lane3;
         lanePanes[3] = lane4;
-
-        startInputLoop();
     }
 
     @FXML
@@ -424,8 +422,8 @@ public class BaseController implements Initializable {
                 ex.printStackTrace();
             }
         }
-        stopGameplay();
         showMainMenu();
+        stopGameplay();
     }
 
     @FXML
@@ -436,6 +434,7 @@ public class BaseController implements Initializable {
         lobbyPane.setDisable(false);
         game.setVisible(false);
         game.setDisable(true);
+        stopGameplay();
     }
 
     private void handleLobbyInfo(com.kartgame.common.protocol.packets.S2C_LobbyInfoPacket response) {
@@ -482,6 +481,7 @@ public class BaseController implements Initializable {
             game.setVisible(true);
             game.setDisable(false);
             game.requestFocus();
+            startInputLoop();
         });
     }
 
@@ -661,6 +661,7 @@ public class BaseController implements Initializable {
         slowing = false;
         turningLeft = false;
         turningRight = false;
+        inputLoopStarted = false;
         tokenToSlot.clear();
 
         if (udpClient != null) {
