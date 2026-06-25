@@ -119,6 +119,8 @@ public class LobbyManager {
 
         Map<Integer, Player> sessionPlayers = new HashMap<>();
         for (Player p : lobby.getPlayers()) {
+            p.setUdpAddress(null);
+            p.setUdpPort(-1);
             sessionPlayers.put(p.getToken(), p);
         }
 

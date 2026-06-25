@@ -753,5 +753,7 @@ public class BaseController implements Initializable {
         if (!inputSender.isShutdown()) {
             inputSender.shutdownNow();
         }
+
+        if (udpClient != null) udpClient.close();
     }
 }

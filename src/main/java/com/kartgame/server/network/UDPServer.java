@@ -81,9 +81,6 @@ public class UDPServer implements Runnable {
             if (!player.isUdpBound()) {
                 player.setUdpAddress(senderIp);
                 player.setUdpPort(senderPort);
-            } else if (!player.getUdpAddress().equals(senderIp) || player.getUdpPort() != senderPort) {
-                System.err.println("UDP from the wrong address received.");
-                return;
             }
 
             if (typeId == PacketType.PING.getId()) return;

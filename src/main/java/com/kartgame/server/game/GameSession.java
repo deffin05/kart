@@ -142,7 +142,7 @@ public class GameSession {
 
     private void applyInput(int token, C2S_UserInput input) {
         KartState kart = kartStates.get(token);
-        if (kart == null) return;
+        if (kart == null || kart.getHp() <= 0) return;
 
         if (input.isLeft()) kart.setAngle(kart.getAngle() - 0.06f);
         if (input.isRight()) kart.setAngle(kart.getAngle() + 0.06f);
