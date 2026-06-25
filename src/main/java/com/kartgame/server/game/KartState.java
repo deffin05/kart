@@ -1,6 +1,8 @@
 package com.kartgame.server.game;
 
 public class KartState {
+    public static final float HIT_RADIUS = 24f;
+
     private int playerToken;
     private float x;
     private float y;

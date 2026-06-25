@@ -26,4 +26,8 @@ public class S2C_GameEnding extends Packet {
     protected void readPayload(ByteBuffer buffer, short length) {
         winnerUsername = readString(buffer);
     }
+
+    public String getWinnerUsername() {
+        return winnerUsername;
+    }
 }

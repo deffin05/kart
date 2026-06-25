@@ -21,7 +21,9 @@ public class Main extends Application {
         controller.setClient(client);
 
         stage.setTitle("Kart Game");
-        stage.setScene(new Scene(root));
+        Scene scene = new Scene(root);
+        controller.attachScene(scene);
+        stage.setScene(scene);
         stage.show();
     }
 

@@ -106,7 +106,7 @@ public class UDPServer implements Runnable {
             Packet packet = PacketRegistry.parse(packetBuffer);
 
             if (packet != null) {
-                // TODO: UDP packet dispatcher
+                routePacketToMatch(player, packet);
             }
 
         } catch (SecurityException e) {

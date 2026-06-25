@@ -122,7 +122,7 @@ public class LobbyManager {
             sessionPlayers.put(p.getToken(), p);
         }
 
-        GameSession session = new GameSession(lobbyId, sessionPlayers, udpServer, db);
+        GameSession session = new GameSession(lobbyId, sessionPlayers, udpServer, db, this::onMatchFinished);
         activeSessions.put(lobbyId, session);
 
         lobby.setGameStarted(true);
@@ -134,6 +134,16 @@ public class LobbyManager {
 
         lobby.broadcast(new S2C_GameStartedPacket());
         System.out.println("Match started for Lobby " + lobbyId);
+    }
+
+    private synchronized void onMatchFinished(int lobbyId) {
+        activeSessions.remove(lobbyId);
+
+        Lobby lobby = lobbyMap.get(lobbyId);
+        if (lobby != null) {
+            lobby.setGameStarted(false);
+            lobby.broadcast(new S2C_LobbyInfoPacket(lobbyId, lobby.getLobbyUsernames()));
+        }
     }
 
     public void shutdown() {
