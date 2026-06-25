@@ -87,6 +87,9 @@ public class LobbyManager {
         if (lobby != null) {
             lobby.removePlayer(player);
 
+            player.setUdpAddress(null);
+            player.setUdpPort(-1);
+
             if (lobby.getPlayerCount() == 0) {
                 lobbyMap.remove(lobbyId);
                 System.out.println("Lobby " + lobbyId + " destroyed.");
